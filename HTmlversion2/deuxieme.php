@@ -1,46 +1,77 @@
-<?php include "./includes/header.php";
-      include "./includes/topmenu.php";
+<?php
+include "./config/connexion.php";
+include "./includes/header.php";
+include "./includes/topmenu.php";
+
+// Fetch existing Filières from the database
+$fetchFiliereQuery = "SELECT * FROM Filière";
+$fetchFiliereResult = $conn->query($fetchFiliereQuery);
 ?>
-        
-          <!-- fenetre flottante ADD  unit-->
-          <div id="addUnitModal" class="modal">
-            <div class="modal-content">
-              <span class="close" onclick="closeAddUnitModal()">&times;</span>
-              <h2>إضافة وحدة تعليمية</h2>
-              <form>
-                <label for="branch">الشعبة:</label><br /> <!-- Utilisation de <br /> au lieu de </br> -->
-                <select id="branch" name="branch" required>
-                  <option value="" disabled selected>اختر الشعبة</option>
-                  <option value="علوم تجريبية">علوم تجريبية</option>
-                  <option value="اداب">اداب</option>
-                </select><br /> <!-- Utilisation de <br /> au lieu de </br> -->
-                <label for="unitName">ادخل اسم الوحدة:</label><br /> <!-- Utilisation de <br /> au lieu de </br> -->
-                <input type="text" id="unitName" name="unitName" required><br /> <!-- Utilisation de <br /> au lieu de </br> -->
-                <button type="submit">إضافة</button>
-              </form>
-            </div>
-          </div>
-  
+
+<!-- Rest of your HTML code -->
+
+<div id="addUnitModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeAddUnitModal()">&times;</span>
+    <h2>إضافة وحدة تعليمية</h2>
+    <form method="POST">
+      <label for="branch">الشعبة:</label><br>
+      <select id="branch" name="branch" required>
+        <option value="" disabled selected>اختر الشعبة</option>
+        <?php
+        // Populate the select options with existing Filières
+        if ($fetchFiliereResult->num_rows > 0) {
+          while ($row = $fetchFiliereResult->fetch_assoc()) {
+            echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
+          }
+        }
+        ?>
+      </select><br>
+
+      <label for="unitName">ادخل اسم الوحدة:</label><br>
+      <input type="text" id="unitName" name="unitName" required><br>
+      <button type="submit" name="Ajouter">إضافة</button>
+    </form>
+  </div>
+</div>
+
+<?php
+if (isset($_POST['Ajouter'])) {
+  $branch = $_POST['branch'];
+  $unitName = $_POST['unitName'];
+
+  // Check if the Chapitre already exists in the selected Filière
+  $checkQuery = "SELECT * FROM Chapitre WHERE chapter_name = '$unitName' AND filiere_id = '$branch'";
+  $checkResult = $conn->query($checkQuery);
+
+  if ($checkResult->num_rows > 0) {
+    echo "<script>alert('هذه الوحدة التعليمية موجودة بالفعل في الشعبة المحددة.');</script>";
+  } else {
+    // Insert the new Chapitre record into the database
+    $insertQuery = "INSERT INTO Chapitre (chapter_name, filiere_id) VALUES ('$unitName', '$branch')";
+    if ($conn->query($insertQuery) === TRUE) {
+      echo "<script>alert('تمت إضافة الوحدة التعليمية بنجاح.');</script>";
+    } else {
+      echo "Error" ;
+    }
+  }
+}
+?>
             <div id="addPartModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeAddPartModal()">&times;</span>
                 <h2>إضافة وحدة جزئية</h2>
                 <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
+                 
                   <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="branch" required>
+                  <select id="branch" name="uniteName" required>
                     <option value="" disabled selected>اختر الوحدة التعليمية</option>
                     <option value="علوم تجريبية">وحدة</option>
                     <option value="اداب">وحدة</option>
                   </select>
                   <label for="unitName"> الوحدة الجزيئية  </label>
-                  <input type="text" id="unitName" name="unitName" required>
-                  <button type="submit">إضافة</button>
+                  <input type="text" id="unitName" name="sousUnite" required>
+                  <button type="submit" name="addSous">إضافة</button>
                 </form>
               </div>
             </div>

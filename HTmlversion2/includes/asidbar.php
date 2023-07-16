@@ -13,6 +13,14 @@
             </a>
           </li>
           <li>
+            <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="filiere.php">
+              <i class="fas fa-user-graduate fa-fw"></i>
+              &nbsp;
+              &nbsp;
+              <span> الشعب</span>
+            </a>
+          </li>
+          <li>
             <a class="d-flex align-center fs-14 c-black rad-6 p-10 toggle-year" href="#">
               <i class="fas fa-book-reader fa-fw"></i>
               &nbsp;
