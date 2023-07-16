@@ -1,0 +1,66 @@
+  /* Hide the sub-list and category list by default */
+  .list.cat-list,
+  .sub-list {
+    display: none;
+  }
+
+  /* Show the sub-list when the 'show' class is added */
+  .sub-list.show {
+    display: block;
+  }
+
+  /* Show the category list when the 'show' class is added */
+  .list.cat-list.show {
+    display: block;
+  }
+
+  .titre1,.titre2,.titre3,.titre4 {
+    color: #333;
+    margin: 0;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.titre1{
+  font-size: 17px;
+}
+.titre2 {
+  font-size: 15px;
+  margin-right: 7px;
+ 
+}
+.titre3 {
+ margin-right: 14px;
+  font-size: 15px;
+
+}
+.titre4{
+  margin-right: 30px;
+  font-size: 15px;
+}
+
+.titre5{
+  margin-right: 35px;
+  font-size: 15px;
+}
+
+.titre5{
+  font-size: 15px;
+  border:solid 2px transparent;
+  border-radius: 10px;
+  padding: 3px 5px;
+}
+#cc{
+  border:solid 2px transparent;
+  border-radius: 10px;
+  margin-top: 5px;
+  margin-bottom:5px;
+  padding: 7px 8px;
+}
+.titre5:hover,#cc:hover {
+  background-color: #b00ea07f;
+    
+}
+#cc{
+  line-height: 4px;
+}

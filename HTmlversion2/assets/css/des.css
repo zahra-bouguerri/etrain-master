@@ -1,0 +1,123 @@
+/* fentr flotant */
+.modal-content {
+background-color: #fefefe;
+margin: 10% auto;
+padding: 40px;
+border: 1px solid #888;
+width: 70%;
+max-width: 800px;
+border-radius: 10px; /* Ajouter une bordure arrondie */
+}
+
+label {
+font-weight: bold;
+color: #555; /* Changer la couleur du texte du label */
+}
+
+input[type="text"],
+select {
+padding: 10px; /* Augmenter la taille du padding */
+border: 1px solid #ccc; /* Ajouter une bordure aux inputs */
+border-radius: 5px; /* Ajouter une bordure arrondie aux inputs */
+}
+
+button[type="submit"] {
+padding: 10px 20px; /* Augmenter la taille du padding */
+background-color: #cfa7c6;
+color: white;
+border: none;
+border-radius: 5px; /* Ajouter une bordure arrondie au bouton */
+cursor: pointer;
+}
+
+button[type="submit"]:hover {
+background-color: #e827bb;
+}
+
+.close {
+color: #aaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+cursor: pointer;
+margin-top: -20px; /* Ajuster la position du bouton de fermeture */
+margin-right: -20px; /* Ajuster la position du bouton de fermeture */
+}
+
+h2 {
+margin-top: 0;
+font-size: 24px;
+color: #333; /* Changer la couleur du texte du titre */
+}
+.modal {
+display: none;
+position: fixed;
+z-index: 1;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: auto;
+background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+background-color: #fefefe;
+margin: 10% auto; /* Réduire la marge supérieure pour centrer la fenêtre */
+padding: 40px; /* Augmenter l'espace de remplissage interne */
+border: 1px solid #888;
+width: 70%; /* Augmenter la largeur de la fenêtre */
+max-width: 800px; /* Définir une largeur maximale pour la fenêtre */
+}
+
+.close {
+color: #aaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+cursor: pointer;
+margin-top: -10px; /* Ajuster la position du bouton de fermeture */
+margin-right: -10px; /* Ajuster la position du bouton de fermeture */
+}
+
+h2 {
+margin-top: 0;
+font-size: 24px; /* Ajuster la taille de la police du titre */
+}
+
+.close:hover,
+.close:focus {
+color: black;
+text-decoration: none;
+cursor: pointer;
+}
+
+h2 {
+margin-top: 0;
+}
+
+form {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+label {
+font-weight: bold;
+}
+
+input[type="text"] {
+padding: 5px;
+}
+
+button[type="submit"] {
+padding: 5px 10px;
+background-color: #cfa7c6;
+color: white;
+border: none;
+cursor: pointer;
+}
+
+button[type="submit"]:hover {
+background-color: #e827bb;
+}
