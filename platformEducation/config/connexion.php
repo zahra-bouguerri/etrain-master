@@ -5,7 +5,7 @@ session_start();
 $host = "localhost";
 $password = "";
 $username = "root";
-$db_name = "db_platform";
+$db_name = "mathplatform";
 $conn = new mysqli($host, $username, $password, $db_name);
 
 if ($conn->connect_error) {

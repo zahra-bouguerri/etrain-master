@@ -4,7 +4,7 @@ include "./includes/header.php";
 include "./includes/topmenu.php";
 
 // Fetch existing Filières from the database
-$fetchFiliereQuery = "SELECT * FROM Filière";
+$fetchFiliereQuery = "SELECT * FROM Filière where year_id = 3";
 $fetchFiliereResult = $conn->query($fetchFiliereQuery);
 ?>
 

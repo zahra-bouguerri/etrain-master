@@ -1,5 +1,4 @@
 <?php include "./includes/header.php"?>
-<?php include "./includes/topmenu.php"?>
 
       <div class="container">
         <h2 class="mt-0 mb-20">اضافة منهج جديد</h2>

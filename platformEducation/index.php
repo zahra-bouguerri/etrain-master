@@ -99,14 +99,14 @@
     <?php 
     function getCountByNiveau($niveau) {
   global $conn;
-  $sql = "SELECT COUNT(*) as count FROM etudiant WHERE annee = '$niveau'";
+  $sql = "SELECT COUNT(*) as count FROM étudiant WHERE annee = '$niveau'";
   $result = $conn->query($sql);
   $row = $result->fetch_assoc();
   return $row['count'];
 }
 function getTotalCount() {
     global $conn;
-    $sql = "SELECT COUNT(*) as count FROM etudiant";
+    $sql = "SELECT COUNT(*) as count FROM étudiant";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
     return $row['count'];
@@ -157,6 +157,7 @@ function getTotalCount() {
                 </div>
             </div>
             <div class="row">
+
                 <div class="col-sm-6 col-lg-4" id="1st">
                     <div class="single_special_cource">
                         <img src="./assets/img/2.png" class="special_img"  width="70%" alt="">
@@ -168,8 +169,16 @@ function getTotalCount() {
                                         <p>اختر تخصصك لتجد الأسئلة المناسبة لمستواك</p><br>
                                         <H5>الشعبةالتعليمية</H5>
                                         <ul class="navbar-nav align-items-start">
-                                            <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;جذع مشترك علوم و تكنولوجيا</a></li>
-                                        <!--    <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp; اداب و فلسفة</a></li>-->
+                                        <?php
+              // Fetch Filières for the 2nd year
+              $fetchFiliereQuery2 = "SELECT * FROM Filière WHERE year_id = 1";
+              $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
+              if ($fetchFiliereResult2->num_rows > 0) {
+                while ($row2 = $fetchFiliereResult2->fetch_assoc()) {
+                  echo "<li><a href='#'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
+                }
+              }
+              ?>
                                         </ul>
                                     </div>
                                 </div>
@@ -189,10 +198,16 @@ function getTotalCount() {
                                         <p>اختر تخصصك لتجد الأسئلة المناسبة لمستواك</p><br>
                                         <H5>الشعبةالتعليمية</H5>
                                         <ul class="navbar-nav align-items-start">
-                                           <!-- <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;  شعبة رياضيات و تقني رياضي</a></li>-->
-                                            <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;  شعبة علوم تجريبية </a></li>
-                                           <!-- <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;شعبة تسيير و اقتصاد </a></li>
-                                            <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;  الشعب الادبية </a></li>-->
+                                        <?php
+              // Fetch Filières for the 2nd year
+              $fetchFiliereQuery2 = "SELECT * FROM Filière WHERE year_id = 2";
+              $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
+              if ($fetchFiliereResult2->num_rows > 0) {
+                while ($row2 = $fetchFiliereResult2->fetch_assoc()) {
+                  echo "<li><a href='#'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
+                }
+              }
+              ?>
                                         </ul>
                                     </div>
                                 </div>
@@ -213,10 +228,16 @@ function getTotalCount() {
                                         <p>اختر تخصصك لتجد الأسئلة المناسبة لمستواك</p><br>
                                         <H5>الشعبةالتعليمية</H5>
                                         <ul class="navbar-nav align-items-start">
-                                          <!--  <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;  شعبة رياضيات و تقني رياضي</a></li>-->
-                                            <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;  شعبة علوم تجريبية </a></li>
-                                           <!-- <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;شعبة تسيير و اقتصاد </a></li>-->
-                                           <!-- <li><a href="#"><i class="fas fa-arrow-left"></i>&nbsp;  الشعب الادبية </a></li>-->
+                                        <?php
+              // Fetch Filières for the 2nd year
+              $fetchFiliereQuery2 = "SELECT * FROM Filière WHERE year_id = 3";
+              $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
+              if ($fetchFiliereResult2->num_rows > 0) {
+                while ($row2 = $fetchFiliereResult2->fetch_assoc()) {
+                  echo "<li><a href='#'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
+                }
+              }
+              ?>
                                         </ul>
                                     </div>
                                 </div>    

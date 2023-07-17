@@ -2,27 +2,47 @@
 include "./config/connexion.php";
 include "./includes/header.php";
 include "./includes/topmenu.php";
-
-// Fetch existing Filières from the database
-$fetchFiliereQuery = "SELECT * FROM Filière";
-$fetchFiliereResult = $conn->query($fetchFiliereQuery);
 ?>
 
 <!-- Rest of your HTML code -->
 
-<div id="addUnitModal" class="modal">
+<div id="addPartModal" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="closeAddUnitModal()">&times;</span>
-    <h2>إضافة وحدة تعليمية</h2>
-    <form method="POST">
-      <label for="branch">الشعبة:</label><br>
+    <span class="close" onclick="closeAddPartModal()">&times;</span>
+    <h2>إضافة وحدة جزئية</h2>
+    <form method="POST"> <!-- Add the method attribute to the form -->
+      <label for="branch">الشعبة:</label>
       <select id="branch" name="branch" required>
         <option value="" disabled selected>اختر الشعبة</option>
         <?php
+        // Fetch existing Filières from the database for addPartModal
+        $fetchFiliereQueryPart = "SELECT * FROM Filière where year_id = 1";
+        $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
+
         // Populate the select options with existing Filières
-        if ($fetchFiliereResult->num_rows > 0) {
-          while ($row = $fetchFiliereResult->fetch_assoc()) {
+        if ($fetchFiliereResultPart->num_rows > 0) {
+          while ($row = $fetchFiliereResultPart->fetch_assoc()) {
             echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
+          }
+        }
+        ?>
+      </select><br>
+      <label for="chapitre">الوحدة التعلمية:</label>
+      <select id="chapitre" name="chapitre" required>
+        <option value="" disabled selected>اختر الوحدة</option>
+        <?php
+        // Fetch chapitres for the selected filiere
+        if (isset($_POST['branch'])) {
+          $selectedFiliere = $_POST['branch'];
+
+          // Fetch chapitres for the selected filière
+          $fetchChapitreQuery = "SELECT * FROM Chapitre WHERE filiere_id IN (SELECT field_id FROM Filière WHERE field_name = '$selectedFiliere')";
+          $fetchChapitreResult = $conn->query($fetchChapitreQuery);
+
+          if ($fetchChapitreResult->num_rows > 0) {
+            while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
+              echo "<option value='" . $chapitreRow['chapter_id'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
+            }
           }
         }
         ?>
@@ -58,26 +78,79 @@ if (isset($_POST['Ajouter'])) {
 }
 ?>
 
+<!--end add chapitre-->
+
 
 <div id="addPartModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeAddPartModal()">&times;</span>
                 <h2>إضافة وحدة جزئية</h2>
-                <form>
-                 
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="uniteName" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
+                <form method="post">
+                <label for="branch">الشعبة:</label><br>
+                    <select id="branch" name="branch" required>
+                  <option value="" disabled selected>اختر الشعبة</option>
+                  <?php
+        // Fetch existing Filières from the database for addPartModal
+        $fetchFiliereQueryPart = "SELECT * FROM Filière where year_id = 1";
+        $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
+
+        // Populate the select options with existing Filières
+        if ($fetchFiliereResultPart->num_rows > 0) {
+          while ($row = $fetchFiliereResultPart->fetch_assoc()) {
+            echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
+          }
+        }
+        ?>
+      </select><br>
+      <label for="chapitre">الوحدة التعلمية:</label><br>
+       <select id="chapitre" name="chapitre" required>
+         <option value="" disabled selected>اختر الوحدة</option>
+         <?php
+// Fetch chapitres for the selected filiere
+if (isset($_POST['branch'])) {
+  $selectedFiliere = $_POST['branch'];
+
+  // Fetch chapitres for the selected filière
+  $fetchChapitreQuery = "SELECT * FROM Chapitre WHERE filiere_id IN (SELECT field_id FROM Filière WHERE field_name = '$selectedFiliere')";
+  $fetchChapitreResult = $conn->query($fetchChapitreQuery);
+
+  if ($fetchChapitreResult->num_rows > 0) {
+    while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
+      echo "<option value='" . $chapitreRow['chapter_id'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
+    }
+  }
+}
+?>
+
+</select><br><br>
                   <label for="unitName"> الوحدة الجزيئية  </label>
                   <input type="text" id="unitName" name="sousUnite" required>
                   <button type="submit" name="addSous">إضافة</button>
                 </form>
               </div>
             </div>
-  
+            <?php
+if (isset($_POST['addSous'])) {
+  $branch = $_POST['branch'];
+  $unitName = $_POST['unitName'];
+
+  // Check if the Chapitre already exists in the selected Filière
+  $checkQuery = "SELECT * FROM Chapitre WHERE chapter_name = '$unitName' AND filiere_id = '$branch'";
+  $checkResult = $conn->query($checkQuery);
+
+  if ($checkResult->num_rows > 0) {
+    echo "<script>alert('هذه الوحدة التعليمية موجودة بالفعل في الشعبة المحددة.');</script>";
+  } else {
+    // Insert the new Chapitre record into the database
+    $insertQuery = "INSERT INTO Chapitre (chapter_name, filiere_id) VALUES ('$unitName', '$branch')";
+    if ($conn->query($insertQuery) === TRUE) {
+      echo "<script>alert('تمت إضافة الوحدة التعليمية بنجاح.');</script>";
+    } else {
+      echo "Error: ";
+    }
+  }
+}
+?>
             <div id="addCourModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeAddCourModal()">&times;</span>
