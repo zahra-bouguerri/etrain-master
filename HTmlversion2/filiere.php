@@ -1,5 +1,4 @@
 <?php
-include "./config/connexion.php";
 include "./includes/header.php";
 
 if (isset($_POST['submit'])) {
@@ -26,7 +25,7 @@ if (isset($_POST['submit'])) {
             if ($conn->query($insertQuery) === TRUE) {
                 echo "<script>alert('تمت إضافة شعبة جديدة بنجاح.');</script>";
             } else {
-                echo "Error: " . $insertQuery . "<br>" . $conn->error;
+                echo "Error: ";
             }
         }
     } else {

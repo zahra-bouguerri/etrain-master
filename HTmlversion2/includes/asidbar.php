@@ -1,4 +1,10 @@
-  <!-- sidbar-->
+<?php
+// Assuming you have the user's role stored in the $userRole variable
+$userRole = "ens"; // Replace with the actual user's role
+include "./config/connexion.php";
+
+?>
+ <!-- sidbar-->
   <div class="sidebar bg-white p-20 p-relative">
         <h3 class="p-relative txt-c mt-0">
           <img src="./assets/imgs/logo.png" alt="Elzero" style="max-width: 100%; height: auto;">
@@ -35,7 +41,7 @@
             </ul>
           </li>
           <li>
-            <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="etudiant.php">
+            <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="student.php">
               <i class="fas fa-user-graduate fa-fw"></i>
               &nbsp;
               &nbsp;
@@ -65,14 +71,24 @@
               <li class="quiz-item"><a href="quizs.php" style="color: black;">     <i class="fas fa-3"></i>                                        السنة الثالثة </a></li>
             </ul>
             </li>
-            <li>
-            <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="profile.php">
-              <i class="fas fa-chalkboard-teacher fa-fw"></i>
-              &nbsp;
-              &nbsp;
-              <span>حسابي </span>
-            </a>
-          </li>
+            <?php if ($userRole !== "ens") { ?>
+        <li>
+          <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="setting.php">
+            <i class="fas fa-chalkboard-teacher fa-fw"></i>
+            &nbsp;
+            &nbsp;
+            <span>حسابي</span>
+          </a>
+        </li>
+        <li>
+          <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="settingEns.php">
+            <i class="fas fa-chalkboard-teacher fa-fw"></i>
+            &nbsp;
+            &nbsp;
+            <span>حساب الاساتذة</span>
+          </a>
+        </li>
+      <?php } ?>
             </ul>
   
       </div>  

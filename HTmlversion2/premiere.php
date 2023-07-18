@@ -1,48 +1,26 @@
 <?php
-include "./config/connexion.php";
 include "./includes/header.php";
 include "./includes/topmenu.php";
 ?>
 
 <!-- Rest of your HTML code -->
 
-<div id="addPartModal" class="modal">
+<div id="addUnitModal" class="modal">
   <div class="modal-content">
-    <span class="close" onclick="closeAddPartModal()">&times;</span>
-    <h2>إضافة وحدة جزئية</h2>
-    <form method="POST"> <!-- Add the method attribute to the form -->
-      <label for="branch">الشعبة:</label>
+    <span class="close" onclick="closeAddUnitModal()">&times;</span>
+    <h2>إضافة وحدة تعليمية</h2>
+    <form method="POST">
+      <label for="branch">الشعبة:</label><br>
       <select id="branch" name="branch" required>
         <option value="" disabled selected>اختر الشعبة</option>
         <?php
-        // Fetch existing Filières from the database for addPartModal
-        $fetchFiliereQueryPart = "SELECT * FROM Filière where year_id = 1";
-        $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
-
+        // Fetch existing Filières from the database
+        $fetchFiliereQuery = "SELECT * FROM Filière where year_id = 1";
+        $fetchFiliereResult = $conn->query($fetchFiliereQuery);
         // Populate the select options with existing Filières
-        if ($fetchFiliereResultPart->num_rows > 0) {
-          while ($row = $fetchFiliereResultPart->fetch_assoc()) {
+        if ($fetchFiliereResult->num_rows > 0) {
+          while ($row = $fetchFiliereResult->fetch_assoc()) {
             echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
-          }
-        }
-        ?>
-      </select><br>
-      <label for="chapitre">الوحدة التعلمية:</label>
-      <select id="chapitre" name="chapitre" required>
-        <option value="" disabled selected>اختر الوحدة</option>
-        <?php
-        // Fetch chapitres for the selected filiere
-        if (isset($_POST['branch'])) {
-          $selectedFiliere = $_POST['branch'];
-
-          // Fetch chapitres for the selected filière
-          $fetchChapitreQuery = "SELECT * FROM Chapitre WHERE filiere_id IN (SELECT field_id FROM Filière WHERE field_name = '$selectedFiliere')";
-          $fetchChapitreResult = $conn->query($fetchChapitreQuery);
-
-          if ($fetchChapitreResult->num_rows > 0) {
-            while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
-              echo "<option value='" . $chapitreRow['chapter_id'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
-            }
           }
         }
         ?>
@@ -103,26 +81,27 @@ if (isset($_POST['Ajouter'])) {
         ?>
       </select><br>
       <label for="chapitre">الوحدة التعلمية:</label><br>
-       <select id="chapitre" name="chapitre" required>
-         <option value="" disabled selected>اختر الوحدة</option>
-         <?php
-// Fetch chapitres for the selected filiere
-if (isset($_POST['branch'])) {
-  $selectedFiliere = $_POST['branch'];
+<select id="chapitre" name="chapitre" required>
+  <option value="" disabled selected>اختر الوحدة</option>
+  <?php
+  // Check if filiere is selected
+  if (isset($_POST['branch'])) {
+    $selectedFiliereName = $_POST['branch'];
 
-  // Fetch chapitres for the selected filière
-  $fetchChapitreQuery = "SELECT * FROM Chapitre WHERE filiere_id IN (SELECT field_id FROM Filière WHERE field_name = '$selectedFiliere')";
-  $fetchChapitreResult = $conn->query($fetchChapitreQuery);
+    // Fetch chapitres where filiere_name matches the selected filiere
+    $fetchChapitreQuery = "SELECT * FROM Chapitre WHERE filiere_id IN (SELECT field_id FROM Filière WHERE field_name = '$selectedFiliereName')";
+    $fetchChapitreResult = $conn->query($fetchChapitreQuery);
 
-  if ($fetchChapitreResult->num_rows > 0) {
-    while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
-      echo "<option value='" . $chapitreRow['chapter_id'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
+    // Populate the select options with existing chapitres
+    if ($fetchChapitreResult->num_rows > 0) {
+      while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
+        echo "<option value='" . $chapitreRow['chapter_id'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
+      }
     }
   }
-}
-?>
-
-</select><br><br>
+  ?>
+</select>
+<br><br>
                   <label for="unitName"> الوحدة الجزيئية  </label>
                   <input type="text" id="unitName" name="sousUnite" required>
                   <button type="submit" name="addSous">إضافة</button>
@@ -248,31 +227,55 @@ if (isset($_POST['addSous'])) {
   
              <!-- fenetre flottante eedit -->
              <div id="EditUnitModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeEditUnitModal()">&times;</span>
-                <h2>تعديل وحدة تعليمية</h2>
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="unitName">اختر اسم الوحدة المراد تعديلها:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة</option>
-                    <option value="علوم تجريبية">تككامل</option>
-                    <option value="اداب">تناسب </option>
-                    <option value="اداب">استمرارية</option>
-                  </select>
-  
-                  <label for="unitName">ادخل اسم الوحدة الجديدة :</label>
-                  <input type="text" id="unitName" name="unitName" required>
-  
-                  <button type="submit">تعديل</button>
-                </form>
-              </div>
-            </div>
+  <div class="modal-content">
+    <span class="close" onclick="closeEditUnitModal()">&times;</span>
+      <h2>تعديل وحدة تعليمية</h2>
+       <form method="post">
+                <label for="branch">الشعبة:</label><br>
+                    <select id="branch" name="editBranch" required>
+                  <option value="" disabled selected>اختر الشعبة</option>
+                  <?php
+        // Fetch existing Filières from the database for addPartModal
+        $fetchFiliereQueryPart = "SELECT * FROM Filière where year_id = 1";
+        $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
+
+        // Populate the select options with existing Filières
+        if ($fetchFiliereResultPart->num_rows > 0) {
+          while ($row = $fetchFiliereResultPart->fetch_assoc()) {
+            echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
+          }
+        }
+        ?>
+      </select><br>
+      <label for="editUnit">اختر اسم الوحدة المراد تعديلها:</label>
+      <select id="editUnit" name="editUnit" required>
+        <option value="" disabled selected>اختر الوحدة</option>
+        
+      </select>
+
+      <label for="newUnitName">ادخل اسم الوحدة الجديدة :</label>
+      <input type="text" id="newUnitName" name="newUnitName" required>
+
+      <button type="submit" name="Edit">تعديل</button>
+    </form>
+  </div>
+</div>
+
+<?php
+if (isset($_POST['Edit'])) {
+  $branch = $_POST['editBranch'];
+  $selectedUnit = $_POST['editUnit'];
+  $newUnitName = $_POST['newUnitName'];
+
+  // Update the selected chapitre for the filiere
+  $updateQuery = "UPDATE Chapitre SET chapter_name = '$newUnitName' WHERE filiere_id = '$branch' AND chapter_name = '$selectedUnit'";
+  if ($conn->query($updateQuery) === TRUE) {
+    echo "<script>alert('تم تعديل الوحدة التعليمية بنجاح.');</script>";
+  } else {
+    echo "Error: ";
+  }
+}
+?>
   
             <div id="EditPartModal" class="modal">
               <div class="modal-content">

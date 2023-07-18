@@ -10,7 +10,7 @@ if (isset($_POST['submit'])) {
     $role = $_POST['roles'];
 
     // Build SQL query to select the user with the specified email and role
-    $sql = "SELECT * FROM admin_users WHERE email='$email' and roles='$role'";
+    $sql = "SELECT * FROM admin WHERE email='$email' and roles='$role'";
 
     // Run the query and save the result in a variable
     $result = $conn->query($sql);
@@ -21,7 +21,7 @@ if (isset($_POST['submit'])) {
         // and save it in a variable
         $row = mysqli_fetch_assoc($result);
 
-        if($password===$row["password"]){
+        if($password===$row["motPass"]){
             $_SESSION['id'] = $row['id'];
             header("Location:./index.php");
             exit(); 
@@ -76,8 +76,8 @@ if (isset($_POST['submit'])) {
                             <p class="role-title">دورك:</p>
                             <select name="roles" class="roles" required>
                                 <option value="">-اختر-</option>
-                                <option value="Chef">مسؤول</option>
-                                <option value="Archiviste">استاذ</option>
+                                <option value="admin">مسؤول</option>
+                                <option value="ens">استاذ</option>
                               
                             </select>
             </div>
