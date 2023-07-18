@@ -57,19 +57,19 @@ if (isset($_POST['Ajouter'])) {
 ?>
 
 <!--end add chapitre-->
-
+<!-- ... -->
 
 <div id="addPartModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeAddPartModal()">&times;</span>
-                <h2>إضافة وحدة جزئية</h2>
-                <form method="post">
-                <label for="branch">الشعبة:</label><br>
-                    <select id="branch" name="branch" required>
-                  <option value="" disabled selected>اختر الشعبة</option>
-                  <?php
+  <div class="modal-content">
+    <span class="close" onclick="closeAddPartModal()">&times;</span>
+    <h2>إضافة وحدة جزئية</h2>
+    <form method="post">
+      <label for="partBranch">الشعبة:</label>
+      <select id="partBranch" name="partBranch" required>
+        <option value="" disabled selected>اختر الشعبة</option>
+        <?php
         // Fetch existing Filières from the database for addPartModal
-        $fetchFiliereQueryPart = "SELECT * FROM Filière where year_id = 1";
+        $fetchFiliereQueryPart = "SELECT * FROM Filière WHERE year_id = 1";
         $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
 
         // Populate the select options with existing Filières
@@ -80,34 +80,54 @@ if (isset($_POST['Ajouter'])) {
         }
         ?>
       </select><br>
-      <label for="chapitre">الوحدة التعلمية:</label><br>
-<select id="chapitre" name="chapitre" required>
-  <option value="" disabled selected>اختر الوحدة</option>
-  <?php
-  // Check if filiere is selected
-  if (isset($_POST['branch'])) {
-    $selectedFiliereName = $_POST['branch'];
 
-    // Fetch chapitres where filiere_name matches the selected filiere
-    $fetchChapitreQuery = "SELECT * FROM Chapitre WHERE filiere_id IN (SELECT field_id FROM Filière WHERE field_name = '$selectedFiliereName')";
-    $fetchChapitreResult = $conn->query($fetchChapitreQuery);
+      <label for="partChapitre">الوحدة التعلمية:</label>
+      <select id="partChapitre" name="partChapitre" required>
+        <option value="" disabled selected>اختر الوحدة</option>
+        <?php
+        if (isset($_POST['partBranch'])) {
+          $selectedFiliere = $_POST['partBranch'];
 
-    // Populate the select options with existing chapitres
-    if ($fetchChapitreResult->num_rows > 0) {
-      while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
-        echo "<option value='" . $chapitreRow['chapter_id'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
-      }
-    }
-  }
-  ?>
-</select>
-<br><br>
-                  <label for="unitName"> الوحدة الجزيئية  </label>
-                  <input type="text" id="unitName" name="sousUnite" required>
-                  <button type="submit" name="addSous">إضافة</button>
-                </form>
-              </div>
-            </div>
+          // Fetch chapitres for the selected filière
+          $fetchChapitreQuery = "SELECT chapter_name 
+                                 FROM chapitre 
+                                 WHERE filiere_id = ?";
+          $stmt = $conn->prepare($fetchChapitreQuery);
+
+          if ($stmt) {
+            // Bind the parameter
+            $stmt->bind_param("s", $selectedFiliere);
+
+            // Execute the statement
+            $stmt->execute();
+
+            // Get the result
+            $result = $stmt->get_result();
+
+            // Fetch chapitres and populate the select options
+            if ($result->num_rows > 0) {
+              while ($chapitreRow = $result->fetch_assoc()) {
+                echo "<option value='" . $chapitreRow['chapter_name'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
+              }
+            }
+
+            // Close the statement
+            $stmt->close();
+          }
+        }
+        ?>
+      </select>
+
+      <br>
+      <label for="unitName"> الوحدة الجزيئية  </label>
+      <input type="text" id="unitName" name="sousUnite" required><br>
+      <button type="submit" name="addSous">إضافة</button>
+    </form>
+  </div>
+</div>
+
+<!-- ... -->
+
             <?php
 if (isset($_POST['addSous'])) {
   $branch = $_POST['branch'];

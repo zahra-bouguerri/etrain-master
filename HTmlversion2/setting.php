@@ -1,5 +1,4 @@
 <?php
-include "./config/connexion.php";
 include "./includes/header.php";
 
 $successMessage = "";

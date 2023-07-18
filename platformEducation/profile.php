@@ -68,7 +68,7 @@
                       <?php
 if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
     $userId = $_SESSION['id'];
-    $sql = "SELECT * FROM etudiant WHERE id=?";
+    $sql = "SELECT * FROM étudiant WHERE student_id=?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -79,7 +79,7 @@ if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
         $nom = $row['nom'];
         $prenom = $row['prenom'];
         $email = $row['email'];
-        $niveau = $row['niveau'];
+        $niveau = $row['annee'];
         echo "<h1>$nom &nbsp;$prenom</h1>";
     }
 }

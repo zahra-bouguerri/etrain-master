@@ -1,4 +1,6 @@
-<?php include "./includes/header.php"?>
+<?php include "./includes/header.php";
+include "./config/connexion.php";
+?>
     <!-- breadcrumb start-->
     <!-- ================ contact section start ================= -->
     <section class="breadcrumb breadcrumb_bg">
@@ -38,44 +40,84 @@
                         </aside>
 
                         <aside class="single_sidebar_widget">
-                            <h6 class="widget_title text-center "> قائمة الوحدات التعليمية</h6>
-                            <!--dropdown of chapitre list-->
-                            <ul class="list cat-lists" id="chapitre">
-                                <li class="has-dropdown">
-                                    <a class="d-flex" id="chapitreList">
-                                        <p class="titre1">الوحدة 1 <i class="fas fa-chevron-down"></i></p>
-                                    </a>
-                                    <ul class="list cat-list" id="miniChapitre">
-                                        <li class="has-dropdown">
-                                            <a class="d-flex" id="listes">
-                                                <p class=" titre2"> الفصل الاول <i class="fas fa-chevron-down"></i></p>
-                                            </a>
-                                            <!--dropdown of cours list-->
-                                            <ul class="list cat-list" id="bccours">
-                                                <li class="has-dropdown">
-                                                    <a class="d-flex" id="cours">
-                                                        <p class="titre3"> الدرس 1 <i class="fas fa-chevron-down"></i></p>
-                                                    </a>
-                                                    <ul class="list cat-list" id="coursList">
-                                                        <li><p class="titre4" id="cc"><a id="cours" class="d-flex"> فيديو قصير</a></p></li>
-                                                        <li class="has-dropdown">
-                                                            <a class="d-flex" id="questions">
-                                                                <p class="titre4" >تقويم <i class="fas fa-chevron-down"></i></p>
-                                                            </a>
-                                                            <ul class="list cat-list" id="questionsList">
-                                                                <li><p class="titre5"><a id="cours" class="d-flex"> فيديو 1</a></p></li>
-                                                            </ul>
-                                                        </li>
-                                                        <!-- Add more subcategories if needed -->
-                                                    </ul>
-                                                </li>
-                                           
+    <h6 class="widget_title text-center"> قائمة الوحدات التعليمية</h6>
+    <ul class="list cat-lists" id="chapitre">
+        <?php
+        // Check if a filière is selected
+        if (isset($_GET['filiere'])) {
+            $selectedFiliere = $_GET['filiere'];
 
-                                </li>
-                            </ul>
-                            <!--end dropdown of chapitre list-->
+            // Prepare the statement
+            $fetchChapitreQuery = "SELECT chapitre.chapter_name 
+            FROM chapitre 
+            JOIN Filière ON Filière.field_id = chapitre.filiere_id 
+            WHERE Filière.field_name = ?";
+            $stmt = $conn->prepare($fetchChapitreQuery);
 
-                        </aside>
+            if ($stmt) {
+                // Bind the parameter
+                $stmt->bind_param("s", $selectedFiliere);
+
+                // Execute the statement
+                $stmt->execute();
+
+                // Get the result
+                $fetchChapitreResult = $stmt->get_result();
+
+                // Display the chapitres
+                if ($fetchChapitreResult->num_rows > 0) {
+                    while ($chapitreRow = $fetchChapitreResult->fetch_assoc()) {
+                        echo "<li class='has-dropdown'>
+                                <a class='d-flex' id='chapitreList'>
+                                    <p class='titre1'>" . $chapitreRow['chapter_name'] . " <i class='fas fa-chevron-down'></i></p>
+                                </a>
+                                <ul class='list cat-list' id='miniChapitre'>
+                                    <li class='has-dropdown'>
+                                        <a class='d-flex' id='listes'>
+                                            <p class='titre2'>الفصل الأول <i class='fas fa-chevron-down'></i></p>
+                                        </a>
+                                        <ul class='list cat-list' id='bccours'>
+                                            <li class='has-dropdown'>
+                                                <a class='d-flex' id='cours'>
+                                                    <p class='titre3'>الدرس 1 <i class='fas fa-chevron-down'></i></p>
+                                                </a>
+                                                <ul class='list cat-list' id='coursList'>
+                                                    <li>
+                                                        <p class='titre4' id='cc'><a id='cours' class='d-flex'>فيديو قصير</a></p>
+                                                    </li>
+                                                    <li class='has-dropdown'>
+                                                        <a class='d-flex' id='questions'>
+                                                            <p class='titre4'>تقويم <i class='fas fa-chevron-down'></i></p>
+                                                        </a>
+                                                        <ul class='list cat-list' id='questionsList'>
+                                                            <li>
+                                                                <p class='titre5'><a id='cours' class='d-flex'>فيديو 1</a></p>
+                                                            </li>
+                                                            <!-- Add more subcategories if needed -->
+                                                        </ul>
+                                                    </li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>";
+                    }
+                } else {
+                    echo "No chapitres found.";
+                }
+
+                // Close the statement
+                $stmt->close();
+            } else {
+                echo "Error in preparing the statement: " . $conn->error;
+            }
+        } else {
+            echo "No filière selected.";
+        }
+        ?>
+    </ul>
+</aside>
                     </div>
                 </div>
                 <div class="col-lg-8 posts-list">

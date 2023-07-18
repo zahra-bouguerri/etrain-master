@@ -1,6 +1,7 @@
 <?php
 include "./config/connexion.php";
 
+$currentYear = date('Y');
 if (isset($_POST['signin'])) {
     // Signup logic
     $nom = $_POST['nom'];
@@ -10,7 +11,7 @@ if (isset($_POST['signin'])) {
     $motPass = $_POST['motPass'];
     $hashed_password = password_hash($motPass, PASSWORD_DEFAULT);
 
-    $sql = "SELECT * FROM etudiant WHERE email=?";
+    $sql = "SELECT * FROM étudiant WHERE email=?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -22,9 +23,9 @@ if (isset($_POST['signin'])) {
         exit();
     }
 
-    $sql = "INSERT INTO etudiant(nom, prenom, email, annee, motPass) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO étudiant(nom, prenom, email, annee, motPass,anneereg) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param('sssss', $nom, $prenom, $email, $niveau, $hashed_password);
+    $stmt->bind_param('ssssss', $nom, $prenom, $email, $niveau, $hashed_password,$currentYear);
     $success = $stmt->execute();
 
     if ($success) {

@@ -7,7 +7,7 @@ if (isset($_POST['login'])) {
     $email = $_POST['emaillogin'];
     $motPass = $_POST['motPasslogin'];
 
-    $sql = "SELECT * FROM etudiant WHERE email=?";
+    $sql = "SELECT * FROM étudiant WHERE email=?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();

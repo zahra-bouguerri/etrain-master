@@ -170,15 +170,15 @@ function getTotalCount() {
                                         <H5>الشعبةالتعليمية</H5>
                                         <ul class="navbar-nav align-items-start">
                                         <?php
-              // Fetch Filières for the 2nd year
-              $fetchFiliereQuery2 = "SELECT * FROM Filière WHERE year_id = 1";
-              $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
-              if ($fetchFiliereResult2->num_rows > 0) {
-                while ($row2 = $fetchFiliereResult2->fetch_assoc()) {
-                  echo "<li><a href='#'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
-                }
-              }
-              ?>
+  // Fetch Filières for the 2nd year
+  $fetchFiliereQuery2 = "SELECT * FROM Filière WHERE year_id = 1";
+  $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
+  if ($fetchFiliereResult2->num_rows > 0) {
+    while ($row2 = $fetchFiliereResult2->fetch_assoc()) {
+      echo "<li><a href='premierAnnee.php?filiere=" . $row2['field_name'] . "'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
+    }
+  }
+  ?>
                                         </ul>
                                     </div>
                                 </div>

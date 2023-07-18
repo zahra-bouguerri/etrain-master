@@ -71,24 +71,25 @@ include "./config/connexion.php";
               <li class="quiz-item"><a href="quizs.php" style="color: black;">     <i class="fas fa-3"></i>                                        السنة الثالثة </a></li>
             </ul>
             </li>
-            <?php if ($userRole !== "ens") { ?>
-        <li>
-          <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="setting.php">
+           <!-- Display the list items conditionally based on the user's role -->
+<?php if (!isset($_SESSION['id']) || $_SESSION['id'] !== 'ens') { ?>
+    <li>
+        <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="setting.php">
             <i class="fas fa-chalkboard-teacher fa-fw"></i>
             &nbsp;
             &nbsp;
             <span>حسابي</span>
-          </a>
-        </li>
-        <li>
-          <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="settingEns.php">
+        </a>
+    </li>
+    <li>
+        <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="settingEns.php">
             <i class="fas fa-chalkboard-teacher fa-fw"></i>
             &nbsp;
             &nbsp;
             <span>حساب الاساتذة</span>
-          </a>
-        </li>
-      <?php } ?>
+        </a>
+    </li>
+<?php } ?>
             </ul>
   
       </div>  

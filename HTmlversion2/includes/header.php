@@ -13,7 +13,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;500&display=swap" rel="stylesheet" />
-    
+     <!-- Favicon -->
+     <link href="../platformEducation/assets/img/favicon.png" rel="icon">
+
   </head>
   <body>
     <div class="page d-flex">
