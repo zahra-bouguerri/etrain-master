@@ -120,10 +120,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
-function handleQuizClick(loggedIn, quizId) {
+function handleQuizClick(loggedIn, quizId, userId) {
   if (loggedIn) {
-    // Redirect the user to the other page with the selected quiz ID
-    window.location.href = `aa.php?quiz=${quizId}`;
+    // Redirect the user to the other page with the selected quiz ID and user ID
+    window.location.href = `aa.php?quiz=${quizId}&user=${userId}`;
   } else {
     // Display an alert message asking the user to log in first
     alert('You need to log in first to access this quiz.');

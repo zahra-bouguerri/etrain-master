@@ -91,6 +91,7 @@ include "./includes/header.php";?>
         $fetchQuizResult = $conn->query($fetchQuizQuery);
 
         $loggedIn = isset($_SESSION['loggedIn']);
+        $userId = $_SESSION['id'] ?? null;
         if ($fetchQuizResult->num_rows > 0) {
             $quizRow = $fetchQuizResult->fetch_assoc();
             $quizId = $quizRow['quiz_id'];
@@ -98,7 +99,7 @@ include "./includes/header.php";?>
 
            
         echo "<li>
-        <a class='d-flex quizItem' id='quiz_$quizId' href='javascript:void(0);' onclick='handleQuizClick($loggedIn, $quizId)'>
+        <a class='d-flex quizItem' id='quiz_$quizId' href='javascript:void(0);' onclick='handleQuizClick($loggedIn, $quizId, $userId)'>
             <p class='titre4'> " . $quizName . "</p>
         </a>
       </li>";
