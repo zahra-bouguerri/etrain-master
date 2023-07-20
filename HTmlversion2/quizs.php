@@ -1,22 +1,21 @@
 <?php
- include "./includes/header.php";
+include "./includes/header.php";
 
 // Fonction pour insérer le quiz dans la base de données
-function ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers, $conn)
+function ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers)
 {
-    // Insérer le nouveau quiz dans la table `quiz`
+    global $conn;
+
     $insertQuizQuery = "INSERT INTO quiz (quiz_name, course_id) VALUES ('$quizName', $courseId)";
     mysqli_query($conn, $insertQuizQuery);
-    $quizId = mysqli_insert_id($conn); // Récupérer l'identifiant du quiz inséré
+    $quizId = mysqli_insert_id($conn);
 
-    // Insérer les questions et les réponses dans les tables `question` et `response`
     for ($i = 0; $i < count($questions); $i++) {
         $questionText = $questions[$i];
         $insertQuestionQuery = "INSERT INTO question (question_text, quiz_id) VALUES ('$questionText', $quizId)";
         mysqli_query($conn, $insertQuestionQuery);
-        $questionId = mysqli_insert_id($conn); // Récupérer l'identifiant de la question insérée
+        $questionId = mysqli_insert_id($conn);
 
-        // Insérer les réponses pour la question actuelle
         for ($j = 0; $j < count($choices[$i]); $j++) {
             $choiceText = $choices[$i][$j];
             $isCorrect = $correctAnswers[$i][$j] ? 1 : 0;
@@ -25,8 +24,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers
         }
     }
 
-    // Afficher un message de succès ou effectuer une autre action
-    echo "Le quiz a été ajouté avec succès.";
+    echo "<script>alert('Le quiz a été ajouté avec succès.')";
 }
 
 // Vérifier si le formulaire a été soumis
@@ -39,10 +37,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
     $correctAnswers = $_POST["is_correct"];
 
     // Appeler la fonction pour ajouter le quiz
-    
-    ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers, $conn);
+    ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers);
 }
 ?>
+
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 
@@ -59,71 +57,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css" />
-
 </head>
 
 <body>
-
-          <div class="responsive-table">
-            <div id="question-container">
-            <div class="content w-full">
+  <div class="responsive-table">
+    <div id="question-container">
+      <div class="content w-full">
         <div class="projects p-20 bg-white rad-10 m-20">
-            <h2 class="mt-0 mb-20">اضافة تقويم جديد</h2>
-     
-
-            <form method="POST" action="">
+          <h2 class="mt-0 mb-20">اضافة تقويم جديد</h2>
+          <form method="POST" action="">
             <input type="text" class="input-field" name="quiz_name" placeholder="عنوان التقويم">
+            <select class="select-field" name="course_id">
+              <?php
+              $sql = "SELECT course_name, course_id FROM cours";
+              $result = $conn->query($sql);
 
-                <select class="select-field" name="course_id">
-                    <?php
-                    // Exécutez la requête SQL pour sélectionner les noms des chapitres
-                    $sql = "SELECT course_name, course_id FROM cours";
-                    $result = $conn->query($sql);
-
-                    // Vérifiez s'il y a des résultats
-                    if ($result->num_rows > 0) {
-                        // Parcourez les résultats et générez les options
-                        while ($row = $result->fetch_assoc()) {
-                            $coursName = $row['course_name'];
-                            $coursId = $row['course_id'];
-                            echo '<option value="' . $coursId . '">' . $coursName . '</option>';
-                        }
-                    } else {
-                        echo '<option value="">Aucun cours trouvé</option>';
-                    }
-                    ?>
-                    <!-- Ajoutez d'autres options de cours si nécessaire -->
-                </select>
-                <div id="main-container">
-                    <div id="question-container-1">
-                        <h2>السؤال 1</h2>
-                        <textarea class="textarea-field" name="question_text[]" placeholder="نص السؤال"></textarea>
-                        <h2>الاختيارات </h2>
-                        <div class="input-container">
-                            <label class="checkbox-container">
-                                <input type="checkbox" name="is_correct[0][]" value="1">
-                                <span class="checkmark"></span>
-                            </label>
-                            <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
-                            <button type="button" class="delete-choice-btn">&#10005;</button>
-                        </div>
-                        <div class="input-container">
-                            <label class="checkbox-container">
-                                <input type="checkbox" name="is_correct[0][]" value="0">
-                                <span class="checkmark"></span>
-                            </label>
-                            <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
-                            <button type="button" class="delete-choice-btn">&#10005;</button>
-                        </div>
-                        <button type="button" class="add-choice-btn" data-container="1">Ajouter une réponse</button>
-                    </div>
+              if ($result->num_rows > 0) {
+                  while ($row = $result->fetch_assoc()) {
+                      $coursName = $row['course_name'];
+                      $coursId = $row['course_id'];
+                      echo '<option value="' . $coursId . '">' . $coursName . '</option>';
+                  }
+              } else {
+                  echo '<option value="">Aucun cours trouvé</option>';
+              }
+              ?>
+            </select>
+            <div id="main-container">
+              <div id="question-container-1">
+                <h2>السؤال 1</h2>
+                <textarea class="textarea-field" name="question_text[]" placeholder="نص السؤال"></textarea>
+                <h2>الاختيارات </h2>
+                <div class="input-container">
+                  <label class="checkbox-container">
+                    <input type="checkbox" name="is_correct[0][]" value="1">
+                    <span class="checkmark"></span>
+                  </label>
+                  <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
+                  <button type="button" class="delete-choice-btn">&#10005;</button>
                 </div>
-                <button type="button" id="add-question-btn">Ajouter une question</button>
-                <button type="submit" name="ajouter_quiz">إضافة الاختبار</button>
-        
-            </form>
-            <button onclick="ajouterChampInput()" class="add-question-btn" style=" background-color: #cfa7c6">لإضافة حقل إدخال</button>
-            </br>
+                <div class="input-container">
+                  <label class="checkbox-container">
+                    <input type="checkbox" name="is_correct[0][]" value="0">
+                    <span class="checkmark"></span>
+                  </label>
+                  <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
+                  <button type="button" class="delete-choice-btn">&#10005;</button>
+                </div>
+                <button type="button" class="add-choice-btn" data-container="1">Ajouter une réponse</button>
+              </div>
+            </div>
+            <button type="button" id="add-question-btn">Ajouter une question</button>
+            <button type="submit" name="ajouter_quiz">إضافة الاختبار</button>
+          </form>
+          <button onclick="ajouterChampInput()" class="add-question-btn" style="background-color: #cfa7c6">لإضافة حقل إدخال</button>
+          </br>
             <div class="keyboard">
                 <button onclick="insertSymbol('-')">-</button>
                 <button onclick="insertSymbol('+')">+</button>
