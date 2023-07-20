@@ -1362,7 +1362,7 @@ ul {
   background-color: #ffe6e6;
 }
 
-.add-question-btn {
+.add-question-btn,.add-choice-btn {
   display: block;
   margin-top: 10px;
   padding: 10px;
@@ -1374,7 +1374,7 @@ ul {
   cursor: pointer;
 }
 
-.add-question-btn:hover {
+.add-question-btn:hover,.add-choice-btn:hover  {
   background-color: #cfa7c6;
 }
 

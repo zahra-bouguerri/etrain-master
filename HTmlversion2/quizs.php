@@ -1,10 +1,24 @@
 <?php
 include "./includes/header.php";
 
+// Create the "upload/" directory if it doesn't exist
+$targetDir = "upload/";
+if (!is_dir($targetDir)) {
+    mkdir($targetDir, 0777, true); // Set appropriate permissions, e.g., 0755
+}
+
 // Fonction pour insérer le quiz dans la base de données
-function ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers)
+function ajouterQuiz($quizName, $courseId, $questions, $img, $choices, $correctAnswers)
 {
     global $conn;
+
+    $checkQuizQuery = "SELECT quiz_id FROM quiz WHERE quiz_name = '$quizName' AND course_id = $courseId";
+    $result = mysqli_query($conn, $checkQuizQuery);
+
+    if (mysqli_num_rows($result) > 0) {
+        echo "<script>alert('Un quiz avec le même nom et le même cours existe déjà. Veuillez choisir un nom de quiz différent.');</script>";
+        return; // Exit the function if the quiz already exists
+    }
 
     $insertQuizQuery = "INSERT INTO quiz (quiz_name, course_id) VALUES ('$quizName', $courseId)";
     mysqli_query($conn, $insertQuizQuery);
@@ -12,7 +26,22 @@ function ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers
 
     for ($i = 0; $i < count($questions); $i++) {
         $questionText = $questions[$i];
-        $insertQuestionQuery = "INSERT INTO question (question_text, quiz_id) VALUES ('$questionText', $quizId)";
+    
+        // Upload the image to a folder on the server
+        $targetDir = "upload/"; // Change the folder path as per your requirement
+        $targetFile = $targetDir . basename($_FILES["question_img"]["name"][$i]);
+        move_uploaded_file($_FILES["question_img"]["tmp_name"][$i], $targetFile);
+
+
+        $checkQuestionQuery = "SELECT question_id FROM question WHERE question_text = '$questionText' AND quiz_id = $quizId";
+        $result = mysqli_query($conn, $checkQuestionQuery);
+    
+        if (mysqli_num_rows($result) > 0) {
+            echo "<script>alert('azer.');</script>";
+            return; // Exit the function if the quiz already exists
+        }
+        // Insert question data into the database
+        $insertQuestionQuery = "INSERT INTO question (question_text, question_img, quiz_id) VALUES ('$questionText', '$targetFile', $quizId)";
         mysqli_query($conn, $insertQuestionQuery);
         $questionId = mysqli_insert_id($conn);
 
@@ -33,12 +62,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
     $quizName = $_POST["quiz_name"];
     $courseId = $_POST["course_id"];
     $questions = $_POST["question_text"];
+   $img = isset($_FILES["question_img"]) ? $_FILES["question_img"]["tmp_name"] : [];
     $choices = $_POST["choice_text"];
     $correctAnswers = $_POST["is_correct"];
 
-    // Appeler la fonction pour ajouter le quiz
-    ajouterQuiz($quizName, $courseId, $questions, $choices, $correctAnswers);
 }
+ // Appeler la fonction pour ajouter le quiz
+ ajouterQuiz($quizName, $courseId, $questions,$img, $choices, $correctAnswers);
 ?>
 
 <!DOCTYPE html>
@@ -65,10 +95,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
       <div class="content w-full">
         <div class="projects p-20 bg-white rad-10 m-20">
           <h2 class="mt-0 mb-20">اضافة تقويم جديد</h2>
-          <form method="POST" action="">
+          <form method="POST" enctype="multipart/form-data">
             <input type="text" class="input-field" name="quiz_name" placeholder="عنوان التقويم">
             <select class="select-field" name="course_id">
-              <?php
+            <option value="" disabled selected>اختر الدرس </option>
+            <?php
               $sql = "SELECT course_name, course_id FROM cours";
               $result = $conn->query($sql);
 
@@ -107,10 +138,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
                 <button type="button" class="add-choice-btn" data-container="1">Ajouter une réponse</button>
               </div>
             </div>
+            <div class="input-container" id="file-upload">
+                        <label><i class='bx bx-file' ></i>صورة:</label>
+                        <input type="file" name="question_img[]" id="file" >
+             </div>  
             <button type="button" id="add-question-btn">Ajouter une question</button>
             <button type="submit" name="ajouter_quiz">إضافة الاختبار</button>
           </form>
-          <button onclick="ajouterChampInput()" class="add-question-btn" style="background-color: #cfa7c6">لإضافة حقل إدخال</button>
+         
           </br>
             <div class="keyboard">
                 <button onclick="insertSymbol('-')">-</button>
@@ -311,7 +346,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
               <!-- Ajoutez d'autres boutons de clavier avec les symboles correspondants -->
             </div>
 
-            <button onclick="ajouterQuestion()" class="add-question-btn" style=" background-color: #cfa7c6">لإضافة سؤال جديد</button>
+          
           </div>
         </div>
       </div>
@@ -480,6 +515,10 @@ questionTextarea.classList.add('textarea-field');
 questionTextarea.name = 'question_text[]';
 questionTextarea.placeholder = 'نص السؤال';
 
+const questionPhoto = document.createElement('file');
+questionPhoto.name = 'question_img[]';
+questionPhoto.placeholder = 'صورة';
+
 const choicesTitle = document.createElement('h2');
 choicesTitle.innerText = 'الاختيارات';
 
@@ -528,6 +567,7 @@ questionAddChoiceButton.addEventListener('click', function () {
 
 questionContainer.appendChild(questionTitle);
 questionContainer.appendChild(questionTextarea);
+questionContainer.appendChild(questionPhoto);
 questionContainer.appendChild(choicesTitle);
 questionContainer.appendChild(firstChoiceContainer);
 questionContainer.appendChild(questionAddChoiceButton);

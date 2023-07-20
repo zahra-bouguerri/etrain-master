@@ -1,6 +1,10 @@
 <?php
 include "./includes/header.php";
 include "./includes/topmenu.php";
+
+// Fetch existing Filières from the database
+$fetchFiliereQuery = "SELECT * FROM Filière where year_id = 1";
+$fetchFiliereResult = $conn->query($fetchFiliereQuery);
 ?>
 
 <!-- Rest of your HTML code -->
@@ -14,9 +18,6 @@ include "./includes/topmenu.php";
       <select id="branch" name="branch" required>
         <option value="" disabled selected>اختر الشعبة</option>
         <?php
-        // Fetch existing Filières from the database
-        $fetchFiliereQuery = "SELECT * FROM Filière where year_id = 1";
-        $fetchFiliereResult = $conn->query($fetchFiliereQuery);
         // Populate the select options with existing Filières
         if ($fetchFiliereResult->num_rows > 0) {
           while ($row = $fetchFiliereResult->fetch_assoc()) {
@@ -55,126 +56,30 @@ if (isset($_POST['Ajouter'])) {
   }
 }
 ?>
-
-<!--end add chapitre-->
-<!-- ... -->
-
-<div id="addPartModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeAddPartModal()">&times;</span>
-    <h2>إضافة وحدة جزئية</h2>
-    <form method="post">
-      <label for="partBranch">الشعبة:</label>
-      <select id="partBranch" name="partBranch" required>
-        <option value="" disabled selected>اختر الشعبة</option>
-        <?php
-        // Fetch existing Filières from the database for addPartModal
-        $fetchFiliereQueryPart = "SELECT * FROM Filière WHERE year_id = 1";
-        $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
-
-        // Populate the select options with existing Filières
-        if ($fetchFiliereResultPart->num_rows > 0) {
-          while ($row = $fetchFiliereResultPart->fetch_assoc()) {
-            echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
-          }
-        }
-        ?>
-      </select><br>
-
-      <label for="partChapitre">الوحدة التعلمية:</label>
-      <select id="partChapitre" name="partChapitre" required>
-        <option value="" disabled selected>اختر الوحدة</option>
-        <?php
-        if (isset($_POST['partBranch'])) {
-          $selectedFiliere = $_POST['partBranch'];
-
-          // Fetch chapitres for the selected filière
-          $fetchChapitreQuery = "SELECT chapter_name 
-                                 FROM chapitre 
-                                 WHERE filiere_id = ?";
-          $stmt = $conn->prepare($fetchChapitreQuery);
-
-          if ($stmt) {
-            // Bind the parameter
-            $stmt->bind_param("s", $selectedFiliere);
-
-            // Execute the statement
-            $stmt->execute();
-
-            // Get the result
-            $result = $stmt->get_result();
-
-            // Fetch chapitres and populate the select options
-            if ($result->num_rows > 0) {
-              while ($chapitreRow = $result->fetch_assoc()) {
-                echo "<option value='" . $chapitreRow['chapter_name'] . "'>" . $chapitreRow['chapter_name'] . "</option>";
-              }
-            }
-
-            // Close the statement
-            $stmt->close();
-          }
-        }
-        ?>
-      </select>
-
-      <br>
-      <label for="unitName"> الوحدة الجزيئية  </label>
-      <input type="text" id="unitName" name="sousUnite" required><br>
-      <button type="submit" name="addSous">إضافة</button>
-    </form>
-  </div>
-</div>
-
-<!-- ... -->
-
-            <?php
-if (isset($_POST['addSous'])) {
-  $branch = $_POST['branch'];
-  $unitName = $_POST['unitName'];
-
-  // Check if the Chapitre already exists in the selected Filière
-  $checkQuery = "SELECT * FROM Chapitre WHERE chapter_name = '$unitName' AND filiere_id = '$branch'";
-  $checkResult = $conn->query($checkQuery);
-
-  if ($checkResult->num_rows > 0) {
-    echo "<script>alert('هذه الوحدة التعليمية موجودة بالفعل في الشعبة المحددة.');</script>";
-  } else {
-    // Insert the new Chapitre record into the database
-    $insertQuery = "INSERT INTO Chapitre (chapter_name, filiere_id) VALUES ('$unitName', '$branch')";
-    if ($conn->query($insertQuery) === TRUE) {
-      echo "<script>alert('تمت إضافة الوحدة التعليمية بنجاح.');</script>";
-    } else {
-      echo "Error: ";
-    }
-  }
-}
-?>
-            <div id="addCourModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeAddCourModal()">&times;</span>
-                <h2>إضافة درس</h2>
-                <form>
   
-                  <label for="branch">الوحدة الجزيئية : </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
+  <div id="addPartModal" class="modal">
+              <div class="modal-content">
+                <span class="close" onclick="closeAddPartModal()">&times;</span>
+                <h2>إضافة وحدة جزئية</h2>
+                <form>
+                 
+                  <label for="branch">الوحدة التعلمية: </label>
+                  <select id="branch" name="uniteName" required>
+                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
                     <option value="علوم تجريبية">وحدة</option>
                     <option value="اداب">وحدة</option>
                   </select>
-  
-                  <label for="unitName"> اضافة درس</label>
-                  <input type="text" id="unitName" name="unitName" required>
-                  <button type="submit">إضافة</button>
+                  <label for="unitName"> الوحدة الجزيئية  </label>
+                  <input type="text" id="unitName" name="sousUnite" required>
+                  <button type="submit" name="addSous">إضافة</button>
                 </form>
               </div>
             </div>
-
-            <!-- fenetre flottante delete -->
-            <div id="DeleteUnitModal" class="modal">
+  
+            <div id="addCourModal" class="modal">
               <div class="modal-content">
-                <span class="close" onclick="closeDeleteUnitModal()">&times;</span>
-                <h2>حذف وحدة تعليمية</h2>
+                <span class="close" onclick="closeAddCourModal()">&times;</span>
+                <h2>إضافة عنوان درس</h2>
                 <form>
                   <label for="branch">الشعبة:</label>
                   <select id="branch" name="branch" required>
@@ -182,24 +87,119 @@ if (isset($_POST['addSous'])) {
                     <option value="علوم تجريبية">علوم تجريبية</option>
                     <option value="اداب">اداب</option>
                   </select>
-                  <label for="unitName">اختر الوحدات المراد حذفها</label>
-                  <div id="unitSelection">
-                    <input type="checkbox" name="unit" value="وحدة 1">وحدة 1<br>
-                    <input type="checkbox" name="unit" value="وحدة 2">وحدة 2<br>
-                    <input type="checkbox" name="unit" value="وحدة 3">وحدة 3<br>
-                    
-                  </div>
-                  <button type="submit">حذف</button>
+                  <label for="branch">الوحدة التعلمية: </label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
+                    <option value="علوم تجريبية">وحدة</option>
+                    <option value="اداب">وحدة</option>
+                  </select>
+  
+                  <label for="branch">لوحدة الجزيئية : </label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
+                    <option value="علوم تجريبية">وحدة</option>
+                    <option value="اداب">وحدة</option>
+                  </select>
+  
+                  <label for="unitName"> اضافة عنوان درس</label>
+                  <input type="text" id="unitName" name="unitName" required>
+                  <button type="submit">إضافة</button>
                 </form>
               </div>
             </div>
+        <?php
+        $selectQuery = "SELECT * FROM Filière";
+        $result = $conn->query($selectQuery);
+            if (isset($_GET['delete'])) {
+    $chapter_id = $_GET['delete'];
+    // Use prepared statement with a placeholder for the id value
+    $deleteSql = "DELETE FROM chapitre WHERE chapter_id = ?";
+    $stmt = $conn->prepare($deleteSql);
+    $stmt->bind_param("s", $chapter_id); // Bind the integer value to the placeholder
+    $deleteResult = $stmt->execute(); // Execute the prepared statement
+
+    // Check if the deletion was successful
+    if ($deleteResult) {
+        echo "<script>alert('تم حذف الشعبة بنجاح.');</script>";
+    } else {
+        echo "<script>alert('حدث خطأ أثناء حذف الشعبة.');</script>";
+    }
+}
+// Fetch existing Filières from the database
+$fetchFiliereQuery2 = "SELECT * FROM Filière where year_id = 1";
+$fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
+// Fetch data for the table
+$selectQuery2 = "SELECT * FROM Filière";
+$result = $conn->query($selectQuery2);
+?>
+            <!-- fenetre flottante delete -->
+            <div id="DeleteUnitModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeDeleteUnitModal()">&times;</span>
+        <h2>حذف الوحدة التعلمية:</h2>
+        <form>
+            <label for="branch">الشعبة:</label><br>
+            <select id="branch" name="branch" required>
+                <option value="" disabled selected>اختر الشعبة</option>
+                <?php
+                // Populate the select options with existing Filières
+                if ($fetchFiliereResult2->num_rows > 0) {
+                    while ($row = $fetchFiliereResult2->fetch_assoc()) {
+                        echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
+                    }
+                }
+                ?>
+            </select><br>
+            <label for="branch">الوحدة التعلمية:</label>
+            <div class="responsive-table">
+                <table class="fs-15 w-full">
+                    <thead>
+                        <tr>
+                            <td>اسم الوحدة التعلمية:</td>
+                            <td> حذف</td>
+                        </tr>
+                    </thead>
+                    <tbody id="chapter-table-body">
+                        <?php
+                        // Your existing PHP code for fetching chapters will remain here
+                        $selectQuery3 = "SELECT * FROM chapitre";
+                        $result3 = $conn->query($selectQuery3);
+                        if ($result3 && $result3->num_rows > 0) {
+                            while ($row = $result3->fetch_assoc()) {
+                                ?>
+                                <tr class="chapter-row" data-filiere="<?php echo $row['filiere_id']; ?>">
+                                    <td><?php echo $row['chapter_name']; ?></td>
+                                    <td>
+                                        <a href="?delete=<?php echo $row['chapter_id']; ?>" onclick="return confirm('هل أنت متأكد من حذف هذه الوحدة التعلمية:')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                        <?php
+                            }
+                        } else {
+                            echo "<tr><td colspan='6'>لا توجد شعب تم العثور عليها</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+         
   
             <div id="DeletePartModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeDeletePartModal()">&times;</span>
                 <h2> حذف وحدة جزئية</h2>
                 <form>
-
+                  <label for="branch">الشعبة:</label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الشعبة</option>
+                    <option value="علوم تجريبية">علوم تجريبية</option>
+                    <option value="اداب">اداب</option>
+                  </select>
                   <label for="branch">الوحدة التعلمية: </label>
                   <select id="branch" name="branch" required>
                     <option value="" disabled selected>اختر الوحدة التعليمية</option>
@@ -221,10 +221,21 @@ if (isset($_POST['addSous'])) {
             <div id="DeleteCourModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeDeleteCourModal()">&times;</span>
-                <h2>حذف درس</h2>
+                <h2>حذف عنوان درس</h2>
                 
                 <form>
-
+                  <label for="branch">الشعبة:</label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الشعبة</option>
+                    <option value="علوم تجريبية">علوم تجريبية</option>
+                    <option value="اداب">اداب</option>
+                  </select>
+                  <label for="branch">الوحدة التعلمية: </label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
+                    <option value="علوم تجريبية">وحدة</option>
+                    <option value="اداب">وحدة</option>
+                  </select>
   
                   <label for="branch">لوحدة الجزيئية : </label>
                   <select id="branch" name="branch" required>
@@ -232,7 +243,7 @@ if (isset($_POST['addSous'])) {
                     <option value="علوم تجريبية">وحدة</option>
                     <option value="اداب">وحدة</option>
                   </select>
-                  <label for="unitName">الدروس المراد حذفها</label>
+                  <label for="unitName">الاسئلة المراد حذفها</label>
                   <div id="unitSelection">
                     <input type="checkbox" name="unit" value="وحدة 1">وحدة 1<br>
                     <input type="checkbox" name="unit" value="وحدة 2">وحدة 2<br>
@@ -247,62 +258,43 @@ if (isset($_POST['addSous'])) {
   
              <!-- fenetre flottante eedit -->
              <div id="EditUnitModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeEditUnitModal()">&times;</span>
-      <h2>تعديل وحدة تعليمية</h2>
-       <form method="post">
-                <label for="branch">الشعبة:</label><br>
-                    <select id="branch" name="editBranch" required>
-                  <option value="" disabled selected>اختر الشعبة</option>
-                  <?php
-        // Fetch existing Filières from the database for addPartModal
-        $fetchFiliereQueryPart = "SELECT * FROM Filière where year_id = 1";
-        $fetchFiliereResultPart = $conn->query($fetchFiliereQueryPart);
-
-        // Populate the select options with existing Filières
-        if ($fetchFiliereResultPart->num_rows > 0) {
-          while ($row = $fetchFiliereResultPart->fetch_assoc()) {
-            echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
-          }
-        }
-        ?>
-      </select><br>
-      <label for="editUnit">اختر اسم الوحدة المراد تعديلها:</label>
-      <select id="editUnit" name="editUnit" required>
-        <option value="" disabled selected>اختر الوحدة</option>
-        
-      </select>
-
-      <label for="newUnitName">ادخل اسم الوحدة الجديدة :</label>
-      <input type="text" id="newUnitName" name="newUnitName" required>
-
-      <button type="submit" name="Edit">تعديل</button>
-    </form>
-  </div>
-</div>
-
-<?php
-if (isset($_POST['Edit'])) {
-  $branch = $_POST['editBranch'];
-  $selectedUnit = $_POST['editUnit'];
-  $newUnitName = $_POST['newUnitName'];
-
-  // Update the selected chapitre for the filiere
-  $updateQuery = "UPDATE Chapitre SET chapter_name = '$newUnitName' WHERE filiere_id = '$branch' AND chapter_name = '$selectedUnit'";
-  if ($conn->query($updateQuery) === TRUE) {
-    echo "<script>alert('تم تعديل الوحدة التعليمية بنجاح.');</script>";
-  } else {
-    echo "Error: ";
-  }
-}
-?>
+              <div class="modal-content">
+                <span class="close" onclick="closeEditUnitModal()">&times;</span>
+                <h2>تعديل وحدة تعليمية</h2>
+                <form>
+                  <label for="branch">الشعبة:</label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الشعبة</option>
+                    <option value="علوم تجريبية">علوم تجريبية</option>
+                    <option value="اداب">اداب</option>
+                  </select>
+                  <label for="unitName">اختر اسم الوحدة المراد تعديلها:</label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الوحدة</option>
+                    <option value="علوم تجريبية">تككامل</option>
+                    <option value="اداب">تناسب </option>
+                    <option value="اداب">استمرارية</option>
+                  </select>
+  
+                  <label for="unitName">ادخل اسم الوحدة الجديدة :</label>
+                  <input type="text" id="unitName" name="unitName" required>
+  
+                  <button type="submit">تعديل</button>
+                </form>
+              </div>
+            </div>
   
             <div id="EditPartModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeEditPartModal()">&times;</span>
                 <h2> تعديل وحدة جزئية</h2>
                 <form>
-
+                  <label for="branch">الشعبة:</label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الشعبة</option>
+                    <option value="علوم تجريبية">علوم تجريبية</option>
+                    <option value="اداب">اداب</option>
+                  </select>
                   <label for="branch">الوحدة التعلمية: </label>
                   <select id="branch" name="branch" required>
                     <option value="" disabled selected>اختر الوحدة التعليمية</option>
@@ -325,9 +317,21 @@ if (isset($_POST['Edit'])) {
             <div id="EditCourModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeEditCourModal()">&times;</span>
-                <h2>تعديل درس</h2>
+                <h2>تعديل عنوان درس</h2>
                 
                 <form>
+                  <label for="branch">الشعبة:</label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الشعبة</option>
+                    <option value="علوم تجريبية">علوم تجريبية</option>
+                    <option value="اداب">اداب</option>
+                  </select>
+                  <label for="branch">الوحدة التعلمية: </label>
+                  <select id="branch" name="branch" required>
+                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
+                    <option value="علوم تجريبية">وحدة</option>
+                    <option value="اداب">وحدة</option>
+                  </select>
   
                   <label for="branch">لوحدة الجزيئية : </label>
                   <select id="branch" name="branch" required>
@@ -335,14 +339,14 @@ if (isset($_POST['Edit'])) {
                     <option value="علوم تجريبية">وحدة</option>
                     <option value="اداب">وحدة</option>
                   </select>
-                  <label for="unitName">عنوان درس المراد تعديله</label>
+                  <label for="unitName">العنوان درس المراد تعديله</label>
                   <div id="unitSelection">
                     <input type="checkbox" name="unit" value="وحدة 1">وحدة 1<br>
                     <input type="checkbox" name="unit" value="وحدة 2">وحدة 2<br>
                     <input type="checkbox" name="unit" value="وحدة 3">وحدة 3<br>
                     
                   </div>
-                  <label for="unitName"> عنوان درس  الجديد</label>
+                  <label for="unitName"> العنوان درس  الجديد</label>
                   <input type="text" id="unitName" name="unitName" required>
                   <button type="submit">تعديل</button>
                 </form>
@@ -406,17 +410,31 @@ if (isset($_POST['Edit'])) {
           
         </div>
         </div>
-      
 
       </div>
      
     </div>
-    
-  
-        <!-- End Head -->
-
-  </body>
-
+</body>
    <script src="./assets/js/script.js"></script>
-  
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Add event listener to the branch select element
+        $("#branch").change(function () {
+            var selectedBranchId = $(this).val();
+
+            // Hide all chapter rows initially
+            $(".chapter-row").hide();
+
+            // Show only the rows that belong to the selected branch
+            $(".chapter-row[data-filiere='" + selectedBranchId + "']").show();
+        });
+    });
+</script>
+
+
+
+
+
+
 </html>

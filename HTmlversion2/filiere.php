@@ -25,7 +25,7 @@ if (isset($_POST['submit'])) {
             if ($conn->query($insertQuery) === TRUE) {
                 echo "<script>alert('تمت إضافة شعبة جديدة بنجاح.');</script>";
             } else {
-                echo "Error: " . $conn->error;
+                echo "Error: ";
             }
         }
     } else {
