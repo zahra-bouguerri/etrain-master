@@ -56,382 +56,170 @@ if (isset($_POST['Ajouter'])) {
   }
 }
 ?>
+<!--end add chapitre-->
+
+
+
   
   <div id="addPartModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeAddPartModal()">&times;</span>
-                <h2>إضافة وحدة جزئية</h2>
-                <form>
-                 
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="uniteName" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  <label for="unitName"> الوحدة الجزيئية  </label>
-                  <input type="text" id="unitName" name="sousUnite" required>
-                  <button type="submit" name="addSous">إضافة</button>
-                </form>
-              </div>
-            </div>
+  <div class="modal-content">
+    <span class="close" onclick="closeAddPartModal()">&times;</span>
+    <h2>إضافة وحدة جزئية</h2>
+    <form method="POST" action="">
+      <label for="branch">الشعبة:</label>
+      <select id="branch" name="branch" required onchange="loadChapters(this.value)">
+        <option value="" disabled selected>اختر الشعبة</option>
+        <?php
+        // Exécutez la requête SQL pour sélectionner les noms des filières
+        $sql = "SELECT field_name, field_id FROM Filière where year_id=1";
+        $result = $conn->query($sql);
+
+        // Vérifiez s'il y a des résultats
+        if ($result->num_rows > 0) {
+            // Parcourez les résultats et générez les options
+            while ($row = $result->fetch_assoc()) {
+                $field_id = $row['field_id'];
+                $field_name = $row['field_name'];
+                echo '<option value="' . $field_id . '">' . $field_name . '</option>';
+            }
+        } else {
+            echo '<option value="">Aucune filière trouvée</option>';
+        }
+        ?>
+      </select>
+      <label for="chapter">الوحدة التعلمية: </label>
+      <select id="chapter" name="chapter" required>
+        <option value="" disabled selected>اختر الوحدة التعليمية</option>
+      </select>
+      <label for="unitName">الوحدة الجزئية:</label>
+      <input type="text" id="unitName" name="Sunit" required>
+      <button type="submit" name="addS">إضافة</button>
+    </form>
+  </div>
+</div>
+
+<?php
+if (isset($_POST['addS'])) {
+  $branch = $_POST['branch'];
+  $unitName = $_POST['chapter'];
+  $Sunit = $_POST['Sunit'];
+
+  // Check if the Chapitre already exists in the selected Filière
+  $checkQuery = "SELECT * FROM sous_chapitre WHERE subchapter_name = '$Sunit' AND chapter_id = '$unitName'";
+  $checkResult = $conn->query($checkQuery);
+
+  if ($checkResult->num_rows > 0) {
+    echo "<script>alert('هذه الوحدة الجزئية موجودة بالفعل في الوحدة المحددة.');</script>";
+  } else {
+    // Insert the new Chapitre record into the database
+    $insertQuery = "INSERT INTO sous_chapitre (subchapter_name, chapter_id) VALUES ('$Sunit', '$unitName')";
+    if ($conn->query($insertQuery) === TRUE) {
+      echo "<script>alert('تمت إضافة الوحدة الجزئية بنجاح.');</script>";
+    } else {
+      echo "Error: ";
+    }
+  }
+}
+?>
+
+<!--end add sous chapitre-->
   
             <div id="addCourModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeAddCourModal()">&times;</span>
                 <h2>إضافة عنوان درس</h2>
-                <form>
+                <form method="POST">
                   <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
+                  <select id="branch" name="branch" required onchange="loadChapters(this.value)">
+                  <option value="" disabled selected>اختر الشعبة</option>
+        <?php
+        // Exécutez la requête SQL pour sélectionner les noms des filières
+        $sql = "SELECT field_name, field_id FROM Filière where year_id=1";
+        $result = $conn->query($sql);
+
+        // Vérifiez s'il y a des résultats
+        if ($result->num_rows > 0) {
+            // Parcourez les résultats et générez les options
+            while ($row = $result->fetch_assoc()) {
+                $field_id = $row['field_id'];
+                $field_name = $row['field_name'];
+                echo '<option value="' . $field_id . '">' . $field_name . '</option>';
+            }
+        } else {
+            echo '<option value="">Aucune filière trouvée</option>';
+        }
+        ?>
+             </select>
+
+                  <label for="chapter">الوحدة التعلمية: </label>
+                  <select id="chapter" name="chapter" required onchange="loadSubchapters(this.value)">
+                  <option value="" disabled selected>اختر الوحدة التعليمية</option>
+                 </select>
+                 
   
-                  <label for="branch">لوحدة الجزيئية : </label>
+                  <label for="branch">الوحدة الجزيئية: </label>
                   <select id="branch" name="branch" required>
                     <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
                   </select>
   
-                  <label for="unitName"> اضافة عنوان درس</label>
-                  <input type="text" id="unitName" name="unitName" required>
+                  <label for="subchapter"> اضافة عنوان درس</label>
+                  <input type="text" id="subchapter" name="subchapter" required>
                   <button type="submit">إضافة</button>
                 </form>
               </div>
             </div>
-        <?php
-        $selectQuery = "SELECT * FROM Filière";
-        $result = $conn->query($selectQuery);
-            if (isset($_GET['delete'])) {
-    $chapter_id = $_GET['delete'];
-    // Use prepared statement with a placeholder for the id value
-    $deleteSql = "DELETE FROM chapitre WHERE chapter_id = ?";
-    $stmt = $conn->prepare($deleteSql);
-    $stmt->bind_param("s", $chapter_id); // Bind the integer value to the placeholder
-    $deleteResult = $stmt->execute(); // Execute the prepared statement
-
-    // Check if the deletion was successful
-    if ($deleteResult) {
-        echo "<script>alert('تم حذف الشعبة بنجاح.');</script>";
-    } else {
-        echo "<script>alert('حدث خطأ أثناء حذف الشعبة.');</script>";
-    }
-}
-// Fetch existing Filières from the database
-$fetchFiliereQuery2 = "SELECT * FROM Filière where year_id = 1";
-$fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
-// Fetch data for the table
-$selectQuery2 = "SELECT * FROM Filière";
-$result = $conn->query($selectQuery2);
-?>
-            <!-- fenetre flottante delete -->
-            <div id="DeleteUnitModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeDeleteUnitModal()">&times;</span>
-        <h2>حذف الوحدة التعلمية:</h2>
-        <form>
-            <label for="branch">الشعبة:</label><br>
-            <select id="branch" name="branch" required>
-                <option value="" disabled selected>اختر الشعبة</option>
-                <?php
-                // Populate the select options with existing Filières
-                if ($fetchFiliereResult2->num_rows > 0) {
-                    while ($row = $fetchFiliereResult2->fetch_assoc()) {
-                        echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
-                    }
-                }
-                ?>
-            </select><br>
-            <label for="branch">الوحدة التعلمية:</label>
-            <div class="responsive-table">
-                <table class="fs-15 w-full">
-                    <thead>
-                        <tr>
-                            <td>اسم الوحدة التعلمية:</td>
-                            <td> حذف</td>
-                        </tr>
-                    </thead>
-                    <tbody id="chapter-table-body">
-                        <?php
-                        // Your existing PHP code for fetching chapters will remain here
-                        $selectQuery3 = "SELECT * FROM chapitre";
-                        $result3 = $conn->query($selectQuery3);
-                        if ($result3 && $result3->num_rows > 0) {
-                            while ($row = $result3->fetch_assoc()) {
-                                ?>
-                                <tr class="chapter-row" data-filiere="<?php echo $row['filiere_id']; ?>">
-                                    <td><?php echo $row['chapter_name']; ?></td>
-                                    <td>
-                                        <a href="?delete=<?php echo $row['chapter_id']; ?>" onclick="return confirm('هل أنت متأكد من حذف هذه الوحدة التعلمية:')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                        <?php
-                            }
-                        } else {
-                            echo "<tr><td colspan='6'>لا توجد شعب تم العثور عليها</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-        </form>
-    </div>
-</div>
-         
-  
-            <div id="DeletePartModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeDeletePartModal()">&times;</span>
-                <h2> حذف وحدة جزئية</h2>
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  <label for="branch">الوحدة الجزيئية  المراد حذفها</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  
-                  <button type="submit">حذف</button>
-                </form>
-              </div>
-            </div>
-
-            <div id="DeleteCourModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeDeleteCourModal()">&times;</span>
-                <h2>حذف عنوان درس</h2>
-                
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-  
-                  <label for="branch">لوحدة الجزيئية : </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  <label for="unitName">الاسئلة المراد حذفها</label>
-                  <div id="unitSelection">
-                    <input type="checkbox" name="unit" value="وحدة 1">وحدة 1<br>
-                    <input type="checkbox" name="unit" value="وحدة 2">وحدة 2<br>
-                    <input type="checkbox" name="unit" value="وحدة 3">وحدة 3<br>
-                    
-                  </div>
-                  <button type="submit">حذف</button>
-                </form>
-                 
-              </div>
-            </div>
-  
-             <!-- fenetre flottante eedit -->
-             <div id="EditUnitModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeEditUnitModal()">&times;</span>
-                <h2>تعديل وحدة تعليمية</h2>
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="unitName">اختر اسم الوحدة المراد تعديلها:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة</option>
-                    <option value="علوم تجريبية">تككامل</option>
-                    <option value="اداب">تناسب </option>
-                    <option value="اداب">استمرارية</option>
-                  </select>
-  
-                  <label for="unitName">ادخل اسم الوحدة الجديدة :</label>
-                  <input type="text" id="unitName" name="unitName" required>
-  
-                  <button type="submit">تعديل</button>
-                </form>
-              </div>
-            </div>
-  
-            <div id="EditPartModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeEditPartModal()">&times;</span>
-                <h2> تعديل وحدة جزئية</h2>
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  <label for="branch">الوحدة الجزيئية  المراد تعديلها</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  <label for="unitName">  الوحدة الجزيئية  الجديدة </label>
-                  <input type="text" id="unitName" name="unitName" required>
-                  <button type="submit">تعديل</button>
-                </form>
-              </div>
-            </div>
-  
-            <div id="EditCourModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeEditCourModal()">&times;</span>
-                <h2>تعديل عنوان درس</h2>
-                
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الشعبة</option>
-                    <option value="علوم تجريبية">علوم تجريبية</option>
-                    <option value="اداب">اداب</option>
-                  </select>
-                  <label for="branch">الوحدة التعلمية: </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-  
-                  <label for="branch">لوحدة الجزيئية : </label>
-                  <select id="branch" name="branch" required>
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
-                  </select>
-                  <label for="unitName">العنوان درس المراد تعديله</label>
-                  <div id="unitSelection">
-                    <input type="checkbox" name="unit" value="وحدة 1">وحدة 1<br>
-                    <input type="checkbox" name="unit" value="وحدة 2">وحدة 2<br>
-                    <input type="checkbox" name="unit" value="وحدة 3">وحدة 3<br>
-                    
-                  </div>
-                  <label for="unitName"> العنوان درس  الجديد</label>
-                  <input type="text" id="unitName" name="unitName" required>
-                  <button type="submit">تعديل</button>
-                </form>
-                 
-              </div>
-            
-        </div>
-         <div class="projects p-20 bg-white rad-10 m-20">
-        <h2 class="mt-0 mb-20">منهج الرياضيات الخاص بالسنة اولى ثانوي علمي</h2>
-        <div class="responsive-table">
-          <table class="fs-15 w-full">
-            <thead>
-              <tr>
-                <td>الوحدات التعليمية</td>
-                <td>الوحدات الجزئية</td>
-                <td>الدروس</td>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td rowspan="3">الوحدة التعلمية الاولى</td>
-                <td>الوحدة الجزئية الاولى</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td>الوحدة الجزئية الثانية</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td>الوحدة الجزئية الثالثة</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td rowspan="3">الوحدة التعلمية الثانية</td>
-                <td>الوحدة الجزئية الاولى</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td>الوحدة الجزئية الثانية</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td>الوحدة الجزئية الثالثة</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td rowspan="3">الوحدة التعلمية الثالثة</td>
-                <td>الوحدة الجزئية الاولى</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td>الوحدة الجزئية الثانية</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-              <tr>
-                <td>الوحدة الجزئية الثالثة</td>
-                <td>الدرس الاول</br>الدرس الثاني</br>الدرس الثالث</br>الدرس الرابع</br></td>
-              </tr>
-            </tbody>
-          </table>
-          
-        </div>
-        </div>
-
-      </div>
      
-    </div>
 </body>
    <script src="./assets/js/script.js"></script>
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function () {
-        // Add event listener to the branch select element
-        $("#branch").change(function () {
-            var selectedBranchId = $(this).val();
 
-            // Hide all chapter rows initially
-            $(".chapter-row").hide();
+   <script>
+  function loadChapters(branchId) {
+    // Effectuez une requête AJAX pour récupérer les chapitres en fonction de l'ID de la filière
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        // Réponse reçue avec succès
+        var chapters = JSON.parse(this.responseText);
+        var chapterSelect = document.getElementById('chapter');
+        chapterSelect.innerHTML = '';
 
-            // Show only the rows that belong to the selected branch
-            $(".chapter-row[data-filiere='" + selectedBranchId + "']").show();
-        });
-    });
+        // Générez les options des chapitres en fonction de la réponse JSON
+        for (var i = 0; i < chapters.length; i++) {
+          var option = document.createElement('option');
+          option.value = chapters[i].chapter_id;
+          option.text = chapters[i].chapter_name;
+          chapterSelect.appendChild(option);
+        }
+      }
+    };
+    xhttp.open("GET", "get_chapters.php?branchId=" + branchId, true);
+    xhttp.send();
+  }
+
+  function loadSubchapters(chapitreId) {
+    // Effectuez une requête AJAX pour récupérer les chapitres en fonction de l'ID de la filière
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        // Réponse reçue avec succès
+        var subchapters = JSON.parse(this.responseText);
+        var subchapterSelect = document.getElementById('subchapter');
+        subchapterSelect.innerHTML = '';
+
+        // Générez les options des chapitres en fonction de la réponse JSON
+        for (var i = 0; i < subchapters.length; i++) {
+          var option = document.createElement('option');
+          option.value = subchapters[i].chapter_id;
+          option.text = subchapters[i].chapter_name;
+          subchapterSelect.appendChild(option);
+        }
+      }
+    };
+    xhttp.open("GET", "get_schapters.php?chapitreId=" + chapitreId, true);
+    xhttp.send();
+  }
 </script>
-
 
 
 

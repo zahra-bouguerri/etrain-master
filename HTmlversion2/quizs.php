@@ -65,10 +65,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
    $img = isset($_FILES["question_img"]) ? $_FILES["question_img"]["tmp_name"] : [];
     $choices = $_POST["choice_text"];
     $correctAnswers = $_POST["is_correct"];
-
-}
  // Appeler la fonction pour ajouter le quiz
  ajouterQuiz($quizName, $courseId, $questions,$img, $choices, $correctAnswers);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -135,14 +135,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
                   <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
                   <button type="button" class="delete-choice-btn">&#10005;</button>
                 </div>
-                <button type="button" class="add-choice-btn" data-container="1">Ajouter une réponse</button>
+                <button type="button" class="add-choice-btn" data-container="1">اضافة اختيار</button>
               </div>
             </div>
             <div class="input-container" id="file-upload">
-                        <label><i class='bx bx-file' ></i>صورة:</label>
+                        <h2>صورة:</h2><br>
                         <input type="file" name="question_img[]" id="file" >
              </div>  
-            <button type="button" id="add-question-btn">Ajouter une question</button>
+            <button type="button" id="add-question-btn">اضافة سؤال</button>
             <button type="submit" name="ajouter_quiz">إضافة الاختبار</button>
           </form>
          

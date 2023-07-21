@@ -3,32 +3,32 @@
 include "./config/connexion.php";
 
 // Récupérer l'ID de la filière depuis la requête GET
-$branchId = $_GET['branchId'];
+$chapitreId = $_GET['chapitreId'];
 
 // Exécutez la requête SQL pour sélectionner les chapitres de la filière sélectionnée
-if (!empty($branchId)) {
-    $sql = "SELECT chapter_id, chapter_name FROM Chapitre WHERE filiere_id = '$branchId'";
+if (!empty($chapitreId)) {
+    $sql = "SELECT soubchapter_id, subchapter_name FROM sous_chapitre WHERE chapter_id = '$chapitreId'";
     $result = $conn->query($sql);
 
     // Vérifiez s'il y a des résultats
     if ($result->num_rows > 0) {
-        $chapters = array();
+        $subchapters = array();
 
         // Parcourez les résultats et ajoutez les chapitres au tableau
         while ($row = $result->fetch_assoc()) {
-            $chapter_id = $row['chapter_id'];
-            $chapter_name = $row['chapter_name'];
+            $subchapter_id = $row['subchapter_id'];
+            $subchapter_name = $row['subchapter_name'];
 
-            $chapter = array(
-                'chapter_id' => $chapter_id,
-                'chapter_name' => $chapter_name
+            $subchapter = array(
+                'subchapter_id' => $subchapter_id,
+                'subchapter_name' => $subchapter_name
             );
 
-            $chapters[] = $chapter;
+            $subchapters[] = $subchapter;
         }
 
         // Renvoyer les chapitres sous forme de JSON
-        echo json_encode($chapters);
+        echo json_encode($subchapters);
     }
 }
 
