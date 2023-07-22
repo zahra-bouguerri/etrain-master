@@ -3,11 +3,11 @@
 include "./config/connexion.php";
 
 // Récupérer l'ID de la filière depuis la requête GET
-$coursId = $_GET['coursId'];
+$subchapterId = $_GET['subchapterId'];
 
 // Exécutez la requête SQL pour sélectionner les courss de la filière sélectionnée
-if (!empty($coursId)) {
-    $sql = "SELECT * FROM cours WHERE course_id = '$coursId'";
+if (!empty($subchapterId)) {
+    $sql = "SELECT * FROM cours WHERE subchapter_id = '$subchapterId'";
     $result3 = $conn->query($sql);
 
     // Vérifiez s'il y a des résultats
@@ -16,12 +16,12 @@ if (!empty($coursId)) {
 
         // Parcourez les résultats et ajoutez les chapitres au tableau
         while ($row3 = $result3->fetch_assoc()) {
-            $course_id = $row3['course_id'];
-            $course_name = $row3['course_name'];
+            $id = $row3['course_id'];
+            $name = $row3['course_name'];
 
             $cours = array(
-                'course_id' => $course_id,
-                'course_name' => $course_name
+                'course_id' => $id,
+                'course_name' => $name
             );
 
             $courses[] = $course;

@@ -434,7 +434,7 @@ $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
                 <h2>تعديل وحدة تعليمية</h2>
                 <form method="POST">
                   <label for="branch">الشعبة:</label>
-                  <select id="branch4" name="branch" required onchange="loadChapters4(this.value)">
+                  <select id="branch4" name="branch2" required onchange="loadChapters4(this.value)">
                   <option value="" disabled selected>اختر الشعبة</option>
         <?php
         // Exécutez la requête SQL pour sélectionner les noms des filières
@@ -456,7 +456,7 @@ $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
              </select>
 
                   <label for="chapter">الوحدة التعلمية: </label>
-                  <select id="chapter4" name="chapter" required >
+                  <select id="chapter4" name="chapter2" required >
                   <option value="" disabled selected>اختر الوحدة التعليمية</option>
                  </select>
   
@@ -472,8 +472,8 @@ $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
 if (isset($_POST['updateChapter'])) {
   // Get the updated chapter name and chapter ID from the form
   $newChapterName = $_POST['newchapter'];
-  $chapterName = $_POST['chapter'];
-  $branchName= $_POST['branch'];
+  $chapterName = $_POST['chapter2'];
+  $branchName= $_POST['branch2'];
 
   // Perform the database update to change the chapter name
   // Assuming you have already established a connection to the database
@@ -483,7 +483,7 @@ if (isset($_POST['updateChapter'])) {
     INNER JOIN Filière ON chapitre.filiere_id = Filière.field_id
     SET chapitre.chapter_name = '$newChapterName' 
     WHERE chapitre.chapter_name = '$chapterName' AND Filière.field_name = '$branchName'";
-    $result = mysqli_query($conn, $updateQuery);
+    $results = mysqli_query($conn, $updateQuery);
 
     // Check if update was successful
     if (mysqli_affected_rows($conn) > 0) {
@@ -575,7 +575,7 @@ if (isset($_POST['updateChapter'])) {
                  
   
                   <label for="subchapter">الوحدة الجزيئية: </label>
-                  <select id="subchapter8" name="subchapter2" required onchange="loadCours(this.value)">
+                  <select id="subchapter8" name="subchapter2" required onchange="loadCours1(this.value)">
                     <option value="" disabled selected>اختر الوحدة الجزئية</option>
                   </select>
                   <label >عنوان درس المراد تعديله</label>
@@ -952,6 +952,8 @@ function loadSubchapters8(chapitreId) {
   xhttp.open("GET", "get_schapters.php?chapitreId=" + chapitreId, true);
   xhttp.send();
 }
+
+
 function loadChapters7(branchId) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -1013,12 +1015,12 @@ function loadChapters8(branchId) {
   xhttp.send();
 }
 
-function loadCours(coursId) {
+function loadCours1(subchapterId) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var courses = JSON.parse(this.responseText);
-      var coursSelect = document.getElementById('ss1');
+      var coursSelect = document.getElementById('cours1');
 
       // Clear the select options before populating
       coursSelect.innerHTML = '';
@@ -1034,13 +1036,13 @@ function loadCours(coursId) {
       // Populate the select with the filtered cours
       for (var i = 0; i < courses.length; i++) {
         var option = document.createElement('option');
-        option.value = courses[i].course_id;
-        option.text = courses[i].course_name;
+        option.value = courses[i].id;
+        option.text = courses[i].name;
         coursSelect.appendChild(option);
       }
     }
   };
-  xhttp.open("GET", "get_cours.php?coursId=" + coursId, true);
+  xhttp.open("GET", "get_cours.php?subchapterId=" + $subchapterId, true);
   xhttp.send();
 }
 </script>
