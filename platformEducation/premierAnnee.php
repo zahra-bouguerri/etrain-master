@@ -50,14 +50,18 @@ include "./includes/header.php";?>
             if (!empty($subChapitresByChapter)) {
                 foreach ($subChapitresByChapter as $chapterId => $subChapitres) {
                     // Fetch the chapter name
-                    $fetchChapterNameQuery = "SELECT chapter_name FROM chapitre WHERE chapter_id = $chapterId";
+                    $fetchChapterNameQuery = "SELECT chapter_name,etat FROM chapitre WHERE chapter_id = $chapterId";
                     $fetchChapterNameResult = $conn->query($fetchChapterNameQuery);
-                    if ($fetchChapterNameResult->num_rows > 0) {
-                        $chapterName = $fetchChapterNameResult->fetch_assoc()['chapter_name'];
+                    if ($fetchChapterNameResult && $fetchChapterNameResult->num_rows > 0) {
+                        $row = $fetchChapterNameResult->fetch_assoc();
+                        $chapterName = $row['chapter_name'];
+                        $etat = $row['etat'];
+                    
                         echo "<li class='has-dropdown'>
                                 <a class='d-flex chapitreList' id='chapitreList_$chapterId'>
-                                    <p class='titre1'>" . $chapterName . " <i class='fas fa-chevron-down'></i></p>
-                                </a>
+                                    <p class='titre1'>" . $chapterName . " <i class='fas fa-chevron-down'></i></p><br>
+                                    <span class='etat-chapitre text-left'><b>".$etat."</b></span>
+                                    </a>
                                 <ul class='list cat-list miniChapitre' id='miniChapitre_$chapterId'>";
 
                         foreach ($subChapitres as $subChapitre) {
@@ -97,9 +101,9 @@ include "./includes/header.php";?>
             $quizId = $quizRow['quiz_id'];
             $quizName = $quizRow['quiz_name'];
 
-           
+            $link = "aa.php?quiz=" . $quizId . "&user=" . $userId;
         echo "<li>
-        <a class='d-flex quizItem' id='quiz_$quizId' href='javascript:void(0);' onclick='handleQuizClick($loggedIn, $quizId, $userId)'>
+        <a class='d-flex quizItem' id='quiz_$quizId' href='$link'>
             <p class='titre4'> " . $quizName . "</p>
         </a>
       </li>";

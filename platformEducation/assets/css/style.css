@@ -6932,3 +6932,8 @@ h1, h2, h3, h4, h5, h6 {
   left: 10px;
   cursor: pointer;
 }
+.etat-chapitre {
+  float: left;
+  /* Adjust the margin as needed */
+  /* Additional styles if needed */
+}

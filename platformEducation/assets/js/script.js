@@ -73,12 +73,6 @@ courseItem.addEventListener('click', function (e) {
 });
 });
 
-  // Function to update the URL with the selected id
-  function updateURL(selectedId, type) {
-    const url = new URL(window.location.href);
-    url.searchParams.set(type, selectedId);
-    history.replaceState(null, '', url);
-  }
 
   // Event listeners for chapitre, souschapitre, cours, and quiz
   document.querySelectorAll('.chapitreList').forEach((element) => {
@@ -110,7 +104,7 @@ courseItem.addEventListener('click', function (e) {
       });
     }
   });
-// script.js
+
 document.addEventListener('DOMContentLoaded', function () {
   // Event listener for quiz items
   document.querySelectorAll('.quizItem').forEach((element) => {
@@ -120,12 +114,3 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 });
-function handleQuizClick(loggedIn, quizId, userId) {
-  if (loggedIn) {
-    // Redirect the user to the other page with the selected quiz ID and user ID
-    window.location.href = `aa.php?quiz=${quizId}&user=${userId}`;
-  } else {
-    // Display an alert message asking the user to log in first
-    alert('You need to log in first to access this quiz.');
-  }
-}

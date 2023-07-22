@@ -8,12 +8,12 @@ include "./includes/header.php";?>
         <div class="container">
             <div class="row">
              <form id="quizForm" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-    <input type="hidden" name="selected_quiz_id" id="selected_quiz_id" value="<?php echo $quiz_id; ?>">
-                    
+    <input type="hidden" name="selected_quiz_id" id="selected_quiz_id" value="<?php echo $quiz_id; ?>">                 
 <?php 
 // Check if the quiz ID is present in the URL
 if (isset($_GET['quiz'])) {
     $quizId = $_GET['quiz'];
+    $userId = $_GET['user'];
 } else {
     // If quiz ID is not present in the URL, you can set a default value or handle the error
     $quizId = 0; // For example, setting it to 0 as a default value
@@ -63,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_quiz'])) {
+if (isset($_POST['submit_quiz'])) {
     // Le formulaire a été soumis et le bouton "السؤال القادم" a été cliqué
 
     // Récupérer les réponses soumises par l'utilisateur
@@ -76,38 +76,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_quiz'])) {
             // ...
         }
     }
-
+    $submitted_quiz_id = $_POST['selected_quiz_id'];
 }
-
 ?>
                 </div>
                 
                     <div class="single-post justify-content-center ">
                         <div class="blog_details">
-                      <?php  $questionNumber=0?>;
-                      <p class="excert text-right"><?php echo 'السؤال ' . ($questionNumber + 1) . ' من ' . count($questions) ; ?></p>
-                            <div class="quote-wrapper">
-                            <h3 class="text-center">تقويم <?php echo $quiz_info['quiz_name']; ?></h3>
-                            <div class="text-right">
-                                    <?php foreach ($questions as $question) : ?>
-                                        </br>
-                                        <h5><?php echo $question['question_text']; ?></h5>
-                                        <?php if ($question['question_img'] !== '') : 
-                                            $imagePath = "../HTMLversion2/" . $question['question_img'];?>
-                                       <!-- Display the question image if available -->
-                                     <?php
-                                      echo '<div style="text-align: center;">';
-                                       echo '<img src="' . $imagePath . '" alt="Question Image">';
-                                      echo '</div>';?>
-                              <?php endif; ?>
-                                        <?php foreach ($responses[$question['question_id']] as $response) : ?>
-                                            <div>
-                                                <input type="checkbox" name="reponse_<?php echo $question['question_id']; ?>[]" value="<?php echo $response['response_id']; ?>">
-                                                <label><?php echo $response['response_text']; ?></label>
-                                        </br>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    <?php endforeach; ?>
+                        
+                        <?php foreach ($questions as $index => $question) : ?>
+    <!-- Display each question and its responses -->
+    <?php $question_id = $question['question_id']; ?>
+    <div class="single-post justify-content-center">
+        <div class="blog_details">
+            <form method="post">
+            <p class="excert text-right"><?php echo 'السؤال ' . ($index + 1) . ' من ' . count($questions); ?></p>
+            <div class="quote-wrapper">
+            <div  class="quotes text-start">
+            <div class="text-right">
+                <h5><?php echo $question['question_text']; ?></h5>
+                <?php if ($question['question_img'] !== '') :
+                    $imagePath = "../HTMLversion2/" . $question['question_img'];
+                    // Display the question image if available
+                    echo '<div style="text-align: center;">';
+                    echo '<img src="' . $imagePath . '" alt="Question Image">';
+                    echo '</div>';
+                endif; ?>
+                <?php foreach ($responses[$question_id] as $response) : ?>
+                    <div>
+                        <input type="checkbox" name="reponse_<?php echo $question_id; ?>[]" value="<?php echo $response['response_id']; ?>">
+                        <label><?php echo $response['response_text']; ?></label>
+                        <br>
+                    </div>
+                <?php endforeach; ?>
+                </div>
+                </div>
+                <!-- Add the "Submit" button for each question -->
+                <div class="detials">
+                    <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit" name="submit_quiz">السؤال القادم</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Add a hidden input field to store the current question number -->
+    <input type="hidden" name="question_number" value="<?php echo $questionNumber; ?>">
+<?php endforeach; ?>
                                         </div>
                         </div>
                     </div>
@@ -121,6 +134,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_quiz'])) {
     <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit" name="submit_quiz">السؤال القادم</button>
 </div>
                     </div>
+                </form>
                 </div>
             </div>
          
@@ -144,126 +158,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_quiz'])) {
 
         </div>
     </div>
-</section>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const chapitreList = document.querySelectorAll('.chapitreList');
-        const miniChapitreList = document.querySelectorAll('.miniChapitre');
-        const listes = document.querySelectorAll('.listes');
-        const bccoursList = document.querySelectorAll('.bccours');
-        const quizzes = document.querySelectorAll('.quizzes');
-
- 
-
-        chapitreList.forEach(function (chapitre) {
-            chapitre.addEventListener('click', function () {
-                const chapterId = this.id.split('_')[1];
-
-                miniChapitreList.forEach(function (miniChapitre) {
-                    if (miniChapitre.id === 'miniChapitre_' + chapterId) {
-                        miniChapitre.classList.toggle('show');
-                    } else {
-                        miniChapitre.classList.remove('show');
-                    }
-                });
-            });
-        });
-
-        listes.forEach(function (liste) {
-            liste.addEventListener('click', function (e) {
-                e.stopPropagation();
-                const subChapterId = this.id.split('_')[1];
-                const bccours = document.getElementById('bccours_' + subChapterId);
-                bccours.classList.toggle('show');
-            });
-        });
-
-        var widgetTitle = document.querySelector('.widget_title');
-
-        widgetTitle.addEventListener('click', function () {
-            this.classList.toggle('open');
-        });
-
-        // Get the elements
-        const videoElement = document.getElementById('cc');
-        const singlePostElement = document.querySelector('.posts-list');
-        const vidio = document.querySelector('.vidio-list');
-
-        // Add click event listener to the video element
-        videoElement.addEventListener('click', function () {
-            // Hide the single post element
-            singlePostElement.style.display = 'none';
-            // Show the vidio post element
-            vidio.style.display = 'block';
-        });
-    });
-        // Get the elements
-        const videoElement = document.getElementById('cc');
-    const singlePostElement = document.querySelector('.posts-list');
-    const vidio = document.querySelector('.vidio-list');
-
-    // Add click event listener to the video element
-    videoElement.addEventListener('click', function () {
-      // Hide the single post element
-      singlePostElement.style.display = 'none';
-      // Show the vidio post element
-      vidio.style.display = 'block';
-    });
-
-    // Add click event listener to course items
-    const courseItems = document.querySelectorAll('.courseItem');
-    courseItems.forEach(function (courseItem) {
-      courseItem.addEventListener('click', function (e) {
-        e.stopPropagation();
-        const courseId = this.id.split('_')[1];
-        const quizzes = document.getElementById('quizzes_' + courseId);
-        quizzes.classList.toggle('show');
-      });
-    });
-
-</script>
-<script>
-  // Function to update the URL with the selected id
-  function updateURL(selectedId, type) {
-    const url = new URL(window.location.href);
-    url.searchParams.set(type, selectedId);
-    history.replaceState(null, '', url);
-  }
-
-  // Event listeners for chapitre, souschapitre, cours, and quiz
-  document.querySelectorAll('.chapitreList').forEach((element) => {
-    element.addEventListener('click', () => {
-      const chapitreId = element.id.split('_')[1];
-      updateURL(chapitreId, 'chapitre');
-    });
-  });
-
-  document.querySelectorAll('.listes').forEach((element) => {
-    element.addEventListener('click', () => {
-      const souschapitreId = element.id.split('_')[1];
-      updateURL(souschapitreId, 'souschapitre');
-    });
-  });
-
-  document.querySelectorAll('.courseItem').forEach((element) => {
-    element.addEventListener('click', () => {
-      const coursId = element.id.split('_')[1];
-      updateURL(coursId, 'cours');
-    });
-  });
-
-  document.querySelectorAll('.d-flex').forEach((element) => {
-    if (element.id.startsWith('quiz_')) {
-      element.addEventListener('click', () => {
-        const quizId = element.id.split('_')[1];
-        updateURL(quizId, 'quiz');
-      });
-    }
-  });
-</script>
-</script>
-
-
 
 <?php include "./includes/footer.php"?>

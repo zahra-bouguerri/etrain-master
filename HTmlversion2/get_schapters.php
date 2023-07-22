@@ -7,17 +7,17 @@ $chapitreId = $_GET['chapitreId'];
 
 // Exécutez la requête SQL pour sélectionner les chapitres de la filière sélectionnée
 if (!empty($chapitreId)) {
-    $sql = "SELECT soubchapter_id, subchapter_name FROM sous_chapitre WHERE chapter_id = '$chapitreId'";
-    $result = $conn->query($sql);
+    $sql = "SELECT * FROM sous_chapitre WHERE chapter_id = '$chapitreId'";
+    $result2 = $conn->query($sql);
 
     // Vérifiez s'il y a des résultats
-    if ($result->num_rows > 0) {
+    if ($result2 && $result2->num_rows > 0) {
         $subchapters = array();
 
         // Parcourez les résultats et ajoutez les chapitres au tableau
-        while ($row = $result->fetch_assoc()) {
-            $subchapter_id = $row['subchapter_id'];
-            $subchapter_name = $row['subchapter_name'];
+        while ($row2 = $result2->fetch_assoc()) {
+            $subchapter_id = $row2['subchapter_id'];
+            $subchapter_name = $row2['subchapter_name'];
 
             $subchapter = array(
                 'subchapter_id' => $subchapter_id,
@@ -29,6 +29,10 @@ if (!empty($chapitreId)) {
 
         // Renvoyer les chapitres sous forme de JSON
         echo json_encode($subchapters);
+    } else {
+        // Handle the case when there are no subchapters
+        $emptyResponse = array('error' => 'No subchapters found');
+        echo json_encode($emptyResponse);
     }
 }
 
