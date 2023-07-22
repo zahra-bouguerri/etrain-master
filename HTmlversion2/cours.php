@@ -9,7 +9,7 @@ if (isset($_POST['Ajouter']) && isset($_POST['cours'])) {
 
     // Handle PDF file upload
     if (isset($_FILES["pdf"]) && $_FILES["pdf"]["error"] == 0) {
-        $target_dir = "uploads/pdf";
+        $target_dir = "../platformEducation/uploads/pdf";
         if (!is_dir($target_dir)) {
             mkdir($target_dir);
         }
@@ -33,7 +33,7 @@ if (isset($_POST['Ajouter']) && isset($_POST['cours'])) {
 
     // Handle video file upload
     if (isset($_FILES["vidio"]) && $_FILES["vidio"]["error"] == 0) {
-        $target_dir = "uploads/videos/";
+        $target_dir = "../platformEducation/uploads/videos/";
         if (!is_dir($target_dir)) {
             mkdir($target_dir);
         }

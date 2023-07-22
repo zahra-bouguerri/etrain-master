@@ -85,9 +85,10 @@ include "./includes/header.php";?>
                                     $courseName = $coursRow['course_name'];
                                     $target_video = $coursRow['video_name']; // Make sure the video_name field is correct
                                     $target_pdf = $coursRow['pdf_name'];
-                                      // Fetch the video URL and set it to $vidio
-                                      $vidio = "../HTMLversion2/" . $target_video;
-                                      $pdf = "../HTMLversion2/" . $target_pdf;
+                                    
+                                    // Fetch the video URL and set it to $vidio
+                                      $vidio =   $target_video;
+                                      $pdf =  $target_pdf;
                                       // Display the course name
                                     echo "<li class='has-dropdown'>
                                     <a class='d-flex courseItem' id='cours_$courseId'>
@@ -112,7 +113,7 @@ include "./includes/header.php";?>
         </a>
       </li>";
         } else {
-            echo " <p class='titre4'>$courseName - لم يتم العثور على اختبار.</p>";
+            echo " <p class='titre4'> لم يتم العثور على اختبار.</p>";
         }
 
                                     echo "<li>
@@ -182,8 +183,8 @@ include "./includes/header.php";?>
 
             <div class="col-lg-8 vidio-list" style="display: none;">
     <div class="single-post">
-        <div class="blog_details">
-            <h2>فيديو</h2>
+    <div class="blog_details text-right">
+            <h2><?php echo $courseName;?></h2>
             <p class="excert"></p>
             <div class="quote-wrapper">
               
