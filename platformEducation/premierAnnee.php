@@ -74,17 +74,21 @@ include "./includes/header.php";?>
                                     </a>
                                     <ul class='list cat-list bccours' id='bccours_$subChapterId'>";
 
-                            // Fetch and display the courses for the sub-chapter
-                            $fetchCoursQuery = "SELECT course_id, course_name
-                                                FROM cours
-                                                WHERE subchapter_id = $subChapterId";
-                            $fetchCoursResult = $conn->query($fetchCoursQuery);
-                            if ($fetchCoursResult->num_rows > 0) {
-                                while ($coursRow = $fetchCoursResult->fetch_assoc()) {
+                           // Fetch and display the courses for the sub-chapter
+                                    $fetchCoursQuery = "SELECT *
+                                    FROM cours
+                                    WHERE subchapter_id = $subChapterId";
+                                    $fetchCoursResult = $conn->query($fetchCoursQuery);
+                                    if ($fetchCoursResult->num_rows > 0) {
+                                    while ($coursRow = $fetchCoursResult->fetch_assoc()) {
                                     $courseId = $coursRow['course_id'];
                                     $courseName = $coursRow['course_name'];
-
-                                    // Display the course name
+                                    $target_video = $coursRow['video_name']; // Make sure the video_name field is correct
+                                    $target_pdf = $coursRow['pdf_name'];
+                                      // Fetch the video URL and set it to $vidio
+                                      $vidio = "../HTMLversion2/" . $target_video;
+                                      $pdf = "../HTMLversion2/" . $target_pdf;
+                                      // Display the course name
                                     echo "<li class='has-dropdown'>
                                     <a class='d-flex courseItem' id='cours_$courseId'>
                                         <p class='titre3'>" . $courseName . " <i class='fas fa-chevron-down'></i></p>
@@ -113,8 +117,12 @@ include "./includes/header.php";?>
 
                                     echo "<li>
                                             <p class='titre4' id='cc'>
-                                                <a id='cours' class='d-flex'> فيديو قصير</a>
+                                            <a id='cours' class='d-flex' href='javascript:void(0);' onclick='showVideo(\"" . $vidio . "\")'>فيديو</a>
                                             </p>
+                                        </li>
+                                        <li>
+                                            <p class='titre4' id='cc'>
+                                            <a id='cours' class='d-flex' href='javascript:void(0);' onclick='showPDF(\"" . $pdf . "\")'>ملخص الدرس</a>                                            </p>
                                         </li>
                                     </ul></li>";
                                 }
@@ -173,26 +181,60 @@ include "./includes/header.php";?>
             <!--vidio div-->
 
             <div class="col-lg-8 vidio-list" style="display: none;">
-                <div class="single-post ">
-                    <div class="blog_details">
-                        <h2>vidio</h2>
-                        <p class="excert"></p>
-                        <div class="quote-wrapper ">
-                            <p class="text-center">السؤال </p>
-                            <div class="quotes text-start">
-                                هل تحب زهرة
-                            </div>
-                        </div>
-                    </div>
-                                        </form>
-                </div>
+    <div class="single-post">
+        <div class="blog_details">
+            <h2>فيديو</h2>
+            <p class="excert"></p>
+            <div class="quote-wrapper">
+              
+                <div class="video-wrapper">
+            <!-- Video player container -->
+<!-- Video player container -->
+<!-- Video player container -->
+<video id="videoPlayer" controls width="640" style="display: none;">
+    <source src="<?php echo $vidio; ?>" type="video/mp4">
+</video>
+        </div>
             </div>
+        </div>
+        
+    </div>
+</div>
 
         </div>
     </div>
 </section>
 
+<script>
+    
+    function showVideo(videoUrl) {
+        var videoPlayer = document.getElementById("videoPlayer");
+        var videoWrapper = document.querySelector(".vidio-list");
 
+        // Show the video wrapper and video player
+        videoWrapper.style.display = "block";
+        videoPlayer.style.display = "block";
+
+        // Set the source of the video player
+        videoPlayer.src = videoUrl;
+    }
+
+    function showPDF(pdfPath) {
+  // Create a hidden anchor element to initiate the download
+  var downloadLink = document.createElement('a');
+  downloadLink.href = pdfPath;
+ 
+
+  // Append the link to the document (this step is essential for some browsers)
+  document.body.appendChild(downloadLink);
+
+  // Trigger the click event on the anchor element
+  downloadLink.click();
+
+  // Remove the anchor element from the document (optional but recommended)
+  document.body.removeChild(downloadLink);
+}
+</script>
 
 <script src="./assets/js/script.js"></script>
 

@@ -1,10 +1,66 @@
 <?php
-include "./includes/header.php";?>
+include "./includes/header.php";
+
+if (isset($_POST['Ajouter']) && isset($_POST['cours'])) {
+    // Initialize variables for file paths
+    $target_file = "";
+    $target_video = "";
+    $selected_course = $_POST['cours'];
+
+    // Handle PDF file upload
+    if (isset($_FILES["pdf"]) && $_FILES["pdf"]["error"] == 0) {
+        $target_dir = "uploads/pdf";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir);
+        }
+        $target_file = $target_dir . basename($_FILES["pdf"]["name"]);
+        if (move_uploaded_file($_FILES["pdf"]["tmp_name"], $target_file)) {
+            echo "<script>alert('PDF added successfully');</script>";
+
+            // Update the PDF file path in the database
+            $sql = "UPDATE cours SET pdf_name = ? WHERE course_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('si', $target_file, $selected_course);
+            if ($stmt->execute()) {
+                echo "<script>alert('Data updated successfully');</script>";
+            } else {
+                echo "<script>alert('Error updating data');</script>";
+            }
+        } else {
+            echo "<script>alert('Error moving the PDF file');</script>";
+        }
+    }
+
+    // Handle video file upload
+    if (isset($_FILES["vidio"]) && $_FILES["vidio"]["error"] == 0) {
+        $target_dir = "uploads/videos/";
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir);
+        }
+        $target_video = $target_dir . basename($_FILES["vidio"]["name"]);
+        if (move_uploaded_file($_FILES["vidio"]["tmp_name"], $target_video)) {
+            echo "<script>alert('Video added successfully');</script>";
+
+            // Update the video file path in the database
+            $sql = "UPDATE cours SET video_name = ? WHERE course_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('si', $target_video, $selected_course);
+            if ($stmt->execute()) {
+                echo "<script>alert('Data updated successfully');</script>";
+            } else {
+                echo "<script>alert('Error updating data');</script>";
+            }
+        } else {
+            echo "<script>alert('Error moving the video file');</script>";
+        }
+    }
+}
+?>
 
       <div class="content w-full">
         <div class="projects p-20 bg-white rad-10 m-20">
           <h2 class="mt-0 mb-20">ادارة الدروس</h2>
-          <form method="POST">
+          <form method="POST" enctype="multipart/form-data">
       <label for="branch">:السنة</label>
       <select name="" id="branch" required onchange="loadBranch(this.value)">
                 <?php
@@ -32,7 +88,7 @@ include "./includes/header.php";?>
              </select>
 
               <br>  <label >الوحدة التعلمية: </label>
-                  <select id="chapter" name="chapter" required onchange="loadSubchapters(this.value)">
+                  <select id="chaptre9" name="chapter" required onchange="loadSubchapters(this.value)">
                   <option value="" disabled selected>اختر الوحدة التعليمية</option>
                  </select>
                  
@@ -43,47 +99,33 @@ include "./includes/header.php";?>
                   </select>
 
                   <br>  <label> :الدرس </label>
-                  <select id="cours" name="subchapter" required>
-                    <option value="" disabled selected>اختر الدرس </option>
+                  <select id="cours" name="cours" required>
+                  <option value="" disabled selected>اختر الدرس</option>
                   </select>
           <div class="responsive-table">
             <div id="question-container">
-               
     
-                <li class="add-question-btn">
-                  <label for="videoFile" class="add-question-btn">
-                    <i class="fas fa-plus"></i>
-                    <span>اضافة فيديو</span>
-                    <input type="file" name="vidio[]" id="videoFile" accept="video/*" onchange="handleFileSelect(event)" style="display: none;">
-          
-                  </label>
-                </li>
-                <li class="add-question-btn">
-                  <label for="videoFile" class="add-question-btn">
-                    <i class="fas fa-plus"></i>
-                    <span>اضافة ملف</span>
-                    <input type="file" name="pdf[]" id="file" >
-          
-                  </label>
-                </li>
-                  <video id="videoPlayer" controls style="display: none;"></video>
+                <label for="pdfFile" class="add-question-btn">
+                <i class="fas fa-plus"></i>
+               <span>اضافة ملف</span>
+               <input type="file" name="pdf" id="pdfFile">
+             </label><br>
 
-
-              
-            </div>
-
-          </div>
-          <button type="submit" name="ajouter_field">إضافة </button>
-        </div>
-      </div>
+    <label for="videoFile" class="add-question-btn">
+        <i class="fas fa-plus"></i>
+        <span>اضافة فيديو</span>
+        <input type="file" name="vidio" id="videoFile" accept="video/*">
+    </label>
+    </div>
+    </div>
+    <button type="submit" name="Ajouter">إضافة</button>
+</form>
+       
+   
 
     </div>
     
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-
 
     function handleFileSelect(event) {
     const file = event.target.files[0];
@@ -95,11 +137,6 @@ include "./includes/header.php";?>
         videoPlayer.style.display = "block";
     }
     }
-    
-   
-
-
-
 
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -142,7 +179,7 @@ function loadChapters(branchId) {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var chapters = JSON.parse(this.responseText);
-      var chapterSelect = document.getElementById('chapitre');
+      var chapterSelect = document.getElementById('chaptre9');
 
       // Clear the select options before populating
       chapterSelect.innerHTML = '';
@@ -220,8 +257,8 @@ function loadBranch(year) {
       // Populate the select with the filtered chapters
       for (var i = 0; i < branchs.length; i++) {
         var option = document.createElement('option');
-        option.value = branchs[i].branch_id;
-        option.text = branchs[i].branch_name;
+        option.value = branchs[i].field_id;
+        option.text = branchs[i].field_name;
         branchSelect.appendChild(option);
       }
     }
@@ -251,13 +288,13 @@ function loadCours(subchapterId) {
       // Populate the select with the filtered cours
       for (var i = 0; i < courses.length; i++) {
         var option = document.createElement('option');
-        option.value = courses[i].id;
-        option.text = courses[i].name;
+        option.value = courses[i].course_id;
+        option.text = courses[i].course_name;
         coursSelect.appendChild(option);
       }
     }
   };
-  xhttp.open("GET", "get_cours.php?subchapterId=" + $subchapterId, true);
+  xhttp.open("GET", "get_cours.php?subchapterId=" + subchapterId, true);
   xhttp.send();
 }
 </script>

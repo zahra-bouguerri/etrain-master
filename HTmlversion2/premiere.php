@@ -576,8 +576,8 @@ if (isset($_POST['updateChapter'])) {
   
                   <label for="subchapter">الوحدة الجزيئية: </label>
                   <select id="subchapter8" name="subchapter2" required onchange="loadCours1(this.value)">
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                  </select>
+                   <option value="" disabled selected>اختر الوحدة الجزئية</option>
+               </select>
                   <label >عنوان درس المراد تعديله</label>
                   <select id="cours1" name="cours" required>
                   <option value="" disabled selected>اختر درس</option>
@@ -1036,13 +1036,13 @@ function loadCours1(subchapterId) {
       // Populate the select with the filtered cours
       for (var i = 0; i < courses.length; i++) {
         var option = document.createElement('option');
-        option.value = courses[i].id;
-        option.text = courses[i].name;
+        option.value = courses[i].course_id;
+        option.text = courses[i].course_name;
         coursSelect.appendChild(option);
       }
     }
   };
-  xhttp.open("GET", "get_cours.php?subchapterId=" + $subchapterId, true);
+  xhttp.open("GET", "get_cours.php?subchapterId=" + subchapterId, true);
   xhttp.send();
 }
 </script>

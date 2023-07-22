@@ -1,6 +1,6 @@
 <?php
-include "./config/connexion.php";
 
+include "./config/connexion.php";
 
 if (isset($_POST['login'])) {
     // Login logic
@@ -18,16 +18,23 @@ if (isset($_POST['login'])) {
 
         if (password_verify($motPass, $row['motPass'])) {
             $success = 'Login successful';
-                        // Check if user is already logged in
+
+            // Check if user is already logged in
             if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
                 // Log out the existing session
                 session_unset();
                 session_destroy();
             }
 
-
             $_SESSION['id'] = $row['student_id'];
             $_SESSION['loggedIn'] = true;
+
+            // Set cookie for persistent login if "Remember Me" is checked
+            if (isset($_POST['remember_me']) && $_POST['remember_me'] == 1) {
+                $cookie_name = 'remember_me_cookie';
+                $cookie_value = $_SESSION['id'];
+                setcookie($cookie_name, $cookie_value, time() + (86400 * 30), "/"); // Cookie expires in 30 days
+            }
 
             $loggedIn = true;
 
@@ -42,7 +49,6 @@ if (isset($_POST['login'])) {
     }
 }
 ?>
-
    
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -81,6 +87,7 @@ if (isset($_POST['login'])) {
             
             </div>
             <input type="submit" value="دخول" name="login" class="btn solid" />
+            <input type="checkbox" name="remember_me" value="1"> Remember Me
          
           </form>
           <form method="POST" action="creatcompte.php" class="sign-up-form">

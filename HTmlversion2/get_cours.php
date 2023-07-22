@@ -16,15 +16,15 @@ if (!empty($subchapterId)) {
 
         // Parcourez les résultats et ajoutez les chapitres au tableau
         while ($row3 = $result3->fetch_assoc()) {
-            $id = $row3['course_id'];
-            $name = $row3['course_name'];
+            $cours_id = $row3['course_id'];
+            $cours_name = $row3['course_name'];
 
             $cours = array(
-                'course_id' => $id,
-                'course_name' => $name
+                'course_id' => $cours_id,
+                'course_name' => $cours_name
             );
-
-            $courses[] = $course;
+            
+            $courses[] = $cours; // Change $cours to $course
         }
 
         // Renvoyer les course sous forme de JSON
