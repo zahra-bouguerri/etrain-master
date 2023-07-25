@@ -2,89 +2,55 @@
 
 include "./includes/header.php";
 
+function fieldExists($fieldName, $yearId, $conn)
+{
+    // Check if the field with the given name and yearId already exists
+    $query = "SELECT COUNT(*) AS count FROM filière WHERE field_name = '$fieldName' AND year_id = $yearId";
+    $result = mysqli_query($conn, $query);
+    $row = mysqli_fetch_assoc($result);
+    return $row['count'] > 0;
+}
+
 // Fonction pour insérer le programme dans la base de données
 function ajouterField($fieldName, $yearId, $sequences, $Chapitres, $cours, $conn)
 {
-     // Check if the filiere name already exists
-     $fieldExistsQuery = "SELECT COUNT(*) FROM filière WHERE field_name = '$fieldName'";
-     $result = mysqli_query($conn, $fieldExistsQuery);
-     $row = mysqli_fetch_array($result);
-     $fieldCount = $row[0];
- 
-     if ($fieldCount > 0) {
-         // Filiere name already exists, do not add it again
-         echo '<script>alert("اسم الشعبة موجود بالفعل.");</script>';
-         return;
-     }
- 
-     // Insert the new filiere in the filiere table
-     $insertFieldQuery = "INSERT INTO filière (field_name, year_id) VALUES ('$fieldName', $yearId)";
-     mysqli_query($conn, $insertFieldQuery);
-     $fieldId = mysqli_insert_id($conn); // Get the inserted filiere ID
+      // Check if the field already exists
+      if (fieldExists($fieldName, $yearId, $conn)) {
+        echo '<script>alert("التخصص موجود بالفعل.");</script>';
+        return;
+    }
+    // Insérer la nouvelle filière dans la table filiere
+    $insertFieldQuery = "INSERT INTO filière (field_name, year_id) VALUES ('$fieldName', $yearId)";
+    mysqli_query($conn, $insertFieldQuery);
+    $fieldId = mysqli_insert_id($conn); // Récupérer l'identifiant de la filière insérée
 
+     // Insérer les chapitres et les sous-chapitres dans les tables chapitre et sous_chapitre
      for ($i = 0; $i < count($sequences); $i++) {
         $sequenceText = $sequences[$i];
-
-        // Check if the chapter name exists within the filiere
-        $sequenceExistsQuery = "SELECT COUNT(*) FROM chapitre WHERE chapter_name = '$sequenceText' AND filiere_id = $fieldId";
-        $result = mysqli_query($conn, $sequenceExistsQuery);
-        $row = mysqli_fetch_array($result);
-        $sequenceCount = $row[0];
-
-        if ($sequenceCount > 0) {
-            // Sequence already exists in the filiere, do not add it again
-            echo '<script>alert("الوحدة التعليمية موجودة ");</script>';
-            continue;
-        }
-
-        // Insert the chapter in the chapitre table
         $insertSequenceQuery = "INSERT INTO chapitre (chapter_name, filiere_id) VALUES ('$sequenceText', $fieldId)";
         mysqli_query($conn, $insertSequenceQuery);
-        $sequenceId = mysqli_insert_id($conn); // Get the inserted chapter ID
+        $sequencesId = mysqli_insert_id($conn); // Récupérer l'identifiant du chapitre inséré
 
         for ($j = 0; $j < count($Chapitres[$i]); $j++) {
             $ChapitreText = $Chapitres[$i][$j];
-
-            // Check if the sous chapitre exists within the chapter
-            $chapitreExistsQuery = "SELECT COUNT(*) FROM sous_chapitre WHERE subchapter_name = '$ChapitreText' AND chapter_id = $sequenceId";
-            $result = mysqli_query($conn, $chapitreExistsQuery);
-            $row = mysqli_fetch_array($result);
-            $chapitreCount = $row[0];
-
-            if ($chapitreCount > 0) {
-                // Sous chapitre already exists in the chapter, do not add it again
-                echo '<script>alert("الوحدة  موجودة الجزئية");</script>';
-                continue;
-            }
-
-            // Insert the sous chapitre in the sous_chapitre table
-            $insertChapitreQuery = "INSERT INTO sous_chapitre (subchapter_name, chapter_id) VALUES ('$ChapitreText', $sequenceId)";
-            mysqli_query($conn, $insertChapitreQuery);
-            $chapitreId = mysqli_insert_id($conn); // Get the inserted sous chapitre ID
         
-            for ($k = 0; $k < count($cours[$i][$j]); $k++) {
+            $insertChapitreQuery = "INSERT INTO sous_chapitre (subchapter_name, chapter_id) VALUES ('$ChapitreText', $sequencesId)";
+            mysqli_query($conn, $insertChapitreQuery);
+            $ChapitreId = mysqli_insert_id($conn); // Récupérer l'identifiant du sous-chapitre inséré
+        
+            for ($k = 0; $k < count($cours [$i][$j]); $k++) {
                 $coursText = $cours[$i][$j][$k];
-
-                // Check if the cours exists within the sous chapitre
-                $coursExistsQuery = "SELECT COUNT(*) FROM cours WHERE course_name = '$coursText' AND subchapter_id = $chapitreId";
-                $result = mysqli_query($conn, $coursExistsQuery);
-                $row = mysqli_fetch_array($result);
-                $coursCount = $row[0];
-
-                if ($coursCount > 0) {
-                    // Cours already exists in the sous chapitre, do not add it again
-                    echo '<script>alert("الدرس  موجودة ");</script>';
-                    continue;
-                }
-
-                // Insert the cours in the cours table
-                $insertCoursQuery = "INSERT INTO cours (course_name, subchapter_id) VALUES ('$coursText', $chapitreId)";
+            
+                $insertCoursQuery = "INSERT INTO cours (course_name, subchapter_id) VALUES ('$coursText', $ChapitreId)";
                 mysqli_query($conn, $insertCoursQuery);
+               
+            
+               
             }
+            
         }
-    }
 
-    echo '<script>alert("تمت إضافة البرنامج بنجاح.");</script>';
+    }
 }
 
 // Vérifier si le formulaire a été soumis
@@ -95,7 +61,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_field"])) {
     $sequences = $_POST["sequences_text"];
     $Chapitres = $_POST["chapitres_text"];
     $cours = $_POST["cour_text"];
+   // Debugging: Check submitted data
+   
   
+       
 
     
     // Appeler la fonction pour ajouter le programme
@@ -196,24 +165,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_field"])) {
             activeInput = this;
         });
 
-        $('#sequence-container').on('click', '.keyboard-button', function () {
-            const symbol = $(this).data('symbol');
-            insertSymbol(symbol);
-        });
 
-        function insertSymbol(symbol) {
-            if (activeInput) {
-                const startPos = activeInput.selectionStart || 0;
-                const endPos = activeInput.selectionEnd || 0;
-                const text = activeInput.value;
-                activeInput.value = text.slice(0, startPos) + symbol + text.slice(endPos);
-                activeInput.setSelectionRange(startPos + symbol.length, startPos + symbol.length);
-            }
-        }
+        
 
-        let sequenceCounter = 2; // Commencez à partir de 1 pour correspondre aux séquences existantes
+        let sequenceCounter = 2; // Initialisez le compteur de séquence à 2 pour correspondre aux séquences existantes
+        let chapitreCounter = 1; // Initialisez le compteur de chapitre à 1 pour correspondre au premier chapitre de la première séquence
+        let coursCounter = 1;    // Initialisez le compteur de cours à 0 pour correspondre au premier cours du premier chapitre
 
         function ajouterSequence() {
+            
                     const nouvelleSequenceHTML = `
                 <div id="sequence-${sequenceCounter}">
                     <div class="question">
@@ -242,6 +202,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_field"])) {
 
             $('#sequence-container').append(nouvelleSequenceHTML);
             sequenceCounter++; // Incrémenter le numéro de la séquence pour la prochaine fois
+            chapitreCounter=1;
+         
 
             // Mettre à jour le tableau sequences_text[]
             const sequencesTextArray = document.querySelectorAll('textarea[name="sequences_text[]"]');
@@ -249,43 +211,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_field"])) {
             console.log(sequencesTextValues);
                     
         }
-        function ajouterLecon(button) {
-            const chapitreContainer = button.parentNode;
-            const leconContainer = chapitreContainer.querySelector('.lesson-container');
-            const coursInput = leconContainer.querySelector('.input-field');
-            const sousChapitreIndex = Array.from(chapitreContainer.parentNode.children).indexOf(chapitreContainer);
-
-            const nouvelleLeconHTML = `
-                <div class="lesson-container">
-                    <div class="input-container">
-                        <input type="text" class="input-field" name="cour_text[${sequenceCounter - 1}][${sousChapitreIndex}][]" placeholder="الدرس" required>
-                        <button onclick="supprimerChampInput(this)" class="delete-choice-btn">&#10005;</button>
-                    </div>
-                </div>
-            `;
-
-            leconContainer.insertAdjacentHTML('beforeend', nouvelleLeconHTML);
-
-            // Mettre à jour le tableau cour_text[][]
-            const coursTextArray = chapitreContainer.querySelectorAll('input[name^="cour_text"]');
-            const coursTextValues = Array.from(coursTextArray).map(input => input.value);
-            console.log(coursTextValues);
-        }
-
+       
         function ajouterChapitre(button) {
-                    const sequenceContainer = button.parentNode;
+           
+            
+            const sequenceContainer = button.parentNode;
             const chapitreContainer = sequenceContainer.querySelector('.chapter-container');
             const chapitreCount = chapitreContainer.querySelectorAll('.lesson-container').length + 1;
 
             const nouveauChapitreHTML = `
                 <div class="chapter-container">
                     <div class="chapter-title">
-                        <input type="text" class="input-field" name="chapitres_text[${sequenceCounter - 1}][]" placeholder="عنوان الوحدة الجزئية" required>
+                        <input type="text" class="input-field" name="chapitres_text[${sequenceCounter - 2}][]" placeholder="عنوان الوحدة الجزئية" required>
                     </div>
 
                     <div class="lesson-container">
                         <div class="input-container">
-                            <input type="text" class="input-field" name="cour_text[${sequenceCounter - 1}][${chapitreCount - 1}][]" placeholder="الدرس" required>
+                            <input type="text" class="input-field" name="cour_text[${sequenceCounter - 2}][][]" placeholder="الدرس" required>
                             <button onclick="supprimerChampInput(this)" class="delete-choice-btn">&#10005;</button>
                         </div>
                     </div>
@@ -295,12 +237,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_field"])) {
             `;
 
             chapitreContainer.insertAdjacentHTML('beforeend', nouveauChapitreHTML);
-
+            chapitreCounter++;
+            coursCounter = 1;
             // Mettre à jour le tableau chapitres_text[][]
             const chapitresTextArray = chapitreContainer.querySelectorAll('input[name^="chapitres_text"]');
             const chapitresTextValues = Array.from(chapitresTextArray).map(input => input.value);
             console.log(chapitresTextValues);
         }
+                        function ajouterLecon(button) {
+
+                const chapitreContainer = button.parentNode;
+                const leconContainer = chapitreContainer.querySelector('.lesson-container');
+                const coursInput = leconContainer.querySelector('.input-field');
+                const sousChapitreIndex = Array.from(chapitreContainer.parentNode.children).indexOf(chapitreContainer);
+
+                const nouvelleLeconHTML = `
+                    <div class="lesson-container">
+                        <div class="input-container">
+                            <input type="text" class="input-field" name="cour_text[${sequenceCounter-2}][${chapitreCounter-1}][]" placeholder="الدرس" required>
+                            <button onclick="supprimerChampInput(this)" class="delete-choice-btn">&#10005;</button>
+                        </div>
+                    </div>
+                `;
+
+                leconContainer.insertAdjacentHTML('beforeend', nouvelleLeconHTML);
+                coursCounter++;
+                // Mettre à jour le tableau cour_text[][]
+                const coursTextArray = chapitreContainer.querySelectorAll('input[name^="cour_text"]');
+                const coursTextValues = Array.from(coursTextArray).map(input => input.value);
+                console.log(coursTextValues);
+                }
 
         function supprimerChampInput(button) {
             const inputContainer = button.parentNode;
@@ -328,5 +294,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_field"])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="./assets/js/script.js"></script>
 </body>
-
 </html>

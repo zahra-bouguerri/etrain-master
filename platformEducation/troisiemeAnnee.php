@@ -31,7 +31,7 @@ include "./includes/header.php";?>
                 JOIN Filière ON Filière.field_id = chapitre.filiere_id 
                 JOIN année ON Filière.year_id = année.year_id
                 LEFT JOIN sous_chapitre ON sous_chapitre.chapter_id = chapitre.chapter_id
-                WHERE Filière.field_name = '$selectedFiliere' AND année.year_id = 2";
+                WHERE Filière.field_name = '$selectedFiliere' AND année.year_id = 3";
             $fetchChapitreResult = $conn->query($fetchChapitreQuery);
 
             // Create an associative array to group sub-chapters by their corresponding chapters

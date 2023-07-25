@@ -234,7 +234,7 @@ function getTotalCount() {
               $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
               if ($fetchFiliereResult2->num_rows > 0) {
                 while ($row2 = $fetchFiliereResult2->fetch_assoc()) {
-                  echo "<li><a href='#'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
+                    echo "<li><a href='troisiemeAnnee.php?filiere=" . $row2['field_name'] . "'><i class='fas fa-arrow-left'></i>&nbsp;" . $row2['field_name'] . "</a></li>";
                 }
               }
               ?>

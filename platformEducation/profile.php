@@ -54,11 +54,7 @@
                         </div>
                     </nav>
                 </div>
-                <div class="sidebar-footer">
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                </div>
+        
             </div>
             <div class="content">
                 <!-- Header Start -->
@@ -111,35 +107,26 @@ if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
                             <div class="col-md-6">
                                 <div class="skills">
                                     <div class="skill-name">
-                                        &nbsp;&nbsp; <p>98%</p><p>الوحدة الاولى</p>
+                                        &nbsp;&nbsp; <p>98%</p><p>الدرس</p>
                                     </div>
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                     <div class="skill-name">
-                                        &nbsp;&nbsp; <p>98%</p><p>الوحدة الاولى</p>
+                                        &nbsp;&nbsp; <p>98%</p><p>الوحدة الجزئية</p>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <div class="skill-name">
+                                        &nbsp;&nbsp; <p>90%</p><p>الوحدة الاولى</p>
                                     </div>
                                     <div class="progress">
                                         <div class="progress-bar" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="skills">
-                                    <div class="skill-name">
-                                        &nbsp;&nbsp; <p>90%</p><p>الوحدة الاولى</p>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <div class="skill-name">
-                                        &nbsp;&nbsp; <p>98%</p><p>الوحدة الاولى</p>
-                                    </div>
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                            </div>
+                           
                         </div>
                     </div>
                 </div>
