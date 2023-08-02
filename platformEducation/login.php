@@ -87,7 +87,7 @@ if (isset($_POST['login'])) {
             
             </div>
             <input type="submit" value="دخول" name="login" class="btn solid" />
-            <input type="checkbox" name="remember_me" value="1"> Remember Me
+            <input type="checkbox" name="remember_me" value="1"> تذكرني
          
           </form>
           <form method="POST" action="creatcompte.php" class="sign-up-form">
