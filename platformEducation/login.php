@@ -38,7 +38,7 @@ if (isset($_POST['login'])) {
 
             $loggedIn = true;
 
-            echo "<script>alert('Login successful');</script>";
+            echo "<script>alert('تم الدخول بنجاح ');</script>";
             echo "<script>window.location.href='index.php';</script>";
             exit();
         } else {
