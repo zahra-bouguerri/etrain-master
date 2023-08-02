@@ -420,10 +420,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
             }
 
             // Bouton "Supprimer question" pour supprimer la question entière
-            newQuestionContainer.append('<button type="button" class="supprimer-question">حذف سؤال </button>');
+            newQuestionContainer.append('<button type="button" class="supprimer-question cc">حذف سؤال </button>');
 
             // Ajouter le nouveau bouton "Ajouter question" à la fin de la nouvelle question
-            newQuestionContainer.append('<button type="button" class="ajouter-question">اضافة سؤال</button>');
+            newQuestionContainer.append('<button type="button" class="ajouter-question cc">اضافة سؤال</button>');
 
             // Insérer la nouvelle question après la question actuelle
             $("#" + currentQuestionContainerId).after(newQuestionContainer);
