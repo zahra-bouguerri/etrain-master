@@ -86,17 +86,14 @@ if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
 
         // Update grades table with "course_id," "subchapter_id," and "chapter_id" based on "quiz_id"
         $update_grades_sql = "
-            UPDATE grades
-            JOIN quiz ON grades.quiz_id = quiz.quiz_id
-            JOIN cours ON quiz.course_id = cours.course_id
-            JOIN sous_chapitre ON cours.subchapter_id = sous_chapitre.subchapter_id
-            SET grades.course_id = quiz.course_id,
-                grades.subchapter_id = sous_chapitre.subchapter_id,
-                grades.chapter_id = sous_chapitre.chapter_id
-            WHERE grades.student_id = ?";
-        $stmt_update_grades = $conn->prepare($update_grades_sql);
-        $stmt_update_grades->bind_param("i", $userId);
-        $stmt_update_grades->execute();
+        UPDATE grades
+        JOIN quiz ON grades.quiz_id = quiz.quiz_id
+        JOIN cours ON quiz.course_id = cours.course_id
+        SET grades.course_id = quiz.course_id
+        WHERE grades.student_id = ?";
+    $stmt_update_grades = $conn->prepare($update_grades_sql);
+    $stmt_update_grades->bind_param("i", $userId);
+    $stmt_update_grades->execute();
     }
 }
 ?>
@@ -176,74 +173,7 @@ if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
 </div>
 <!-- About End -->
 
-<div class="about" id="about">
-    <div class="content-inner">
-        <div class="content-header">
-            <h2>  مستوى التقدم في الوحدات التعليمية</h2>
-        </div>
-        <div class="row align-items-center">
 
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="skills">
-                    <?php
-                       // Calculate and display the average score for each chapter
-                       $sql_avg_chapter_scores = "
-                       SELECT sous_chapitre.chapter_id, AVG(grades.score) AS avg_chapter_score
-                       FROM sous_chapitre
-                       LEFT JOIN cours ON sous_chapitre.subchapter_id = cours.subchapter_id
-                       LEFT JOIN quiz ON cours.course_id = quiz.course_id
-                       LEFT JOIN grades ON quiz.quiz_id = grades.quiz_id
-                       WHERE grades.student_id = ?
-                       GROUP BY sous_chapitre.chapter_id";
-                   
-                   $stmt_avg_chapter_scores = $conn->prepare($sql_avg_chapter_scores);
-                   $stmt_avg_chapter_scores->bind_param("i", $userId);
-                   $stmt_avg_chapter_scores->execute();
-                   $result_avg_chapter_scores = $stmt_avg_chapter_scores->get_result();
-                   
-                   if ($result_avg_chapter_scores->num_rows > 0) {
-                       while ($row_avg_chapter_score = $result_avg_chapter_scores->fetch_assoc()) {
-                           $chapter_id = $row_avg_chapter_score['chapter_id'];
-                           $avg_chapter_score = $row_avg_chapter_score['avg_chapter_score'];
-
-                           // Get the chapter name based on the chapter_id (you need to have a "chapitre" table with chapter_id and chapter_name)
-                           $sql_chapter = "SELECT chapter_name FROM chapitre WHERE chapter_id = ?";
-                           $stmt_chapter = $conn->prepare($sql_chapter);
-                           $stmt_chapter->bind_param("i", $chapter_id);
-                           $stmt_chapter->execute();
-                           $result_chapter = $stmt_chapter->get_result();
-                           $row_chapter = $result_chapter->fetch_assoc();
-                           $chapter_name = $row_chapter['chapter_name'];
-
-                            // Determine the class for the progress bar based on the score range
-                            $progress_bar_class = 'progress-bar bg-success'; // Default: Green
-                            if ($avg_chapter_score < 50) {
-                                $progress_bar_class = 'progress-bar bg-danger'; // Red
-                            } elseif ($avg_chapter_score >= 50 && $avg_chapter_score < 80) {
-                                $progress_bar_class = 'progress-bar bg-warning'; // Orange
-                            }
-
-                           echo "<div class='skill-name'>";
-                           echo "&nbsp;&nbsp;<p>" . round($avg_chapter_score) . "%</p><p>$chapter_name</p>";
-                           echo "</div>";
-                           echo "<div class='progress'>";
-                           echo "<div class='$progress_bar_class' role='progressbar' aria-valuenow='$avg_chapter_score' aria-valuemin='0' aria-valuemax='100' style='width: $avg_chapter_score%;'></div>";
-                           echo "</div>";
-                       }
-                   } else {
-                       echo "No chapter data available.";
-                   }
-                   
-                    ?>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-               
                 
                 <!-- Contact Start -->
                 <div class="contact" id="contact">
