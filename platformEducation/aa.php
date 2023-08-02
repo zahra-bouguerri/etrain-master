@@ -1,13 +1,7 @@
 <?php
+
 include "./config/connexion.php";
 include "./includes/header.php";
-
-// Check if the user is logged in.
-if (!isset($_SESSION['loggedIn']) || !$_SESSION['loggedIn']) {
-    // Redirect the user to the login page or show an appropriate message.
-    echo "<script>alert('Veuillez vous connecter pour accéder au quiz.');</script>";
-    exit;
-}
 
 if (isset($_GET['quiz'])) {
     $quizId = $_GET['quiz'];
@@ -84,20 +78,17 @@ if (isset($_GET['quiz'])) {
                                     endif; ?>
                                     <?php foreach ($responses[$question_id] as $response) : ?>
                                         <div>
-    <input type="radio" name="reponse_<?php echo $question_id; ?>" id="reponse_<?php echo $question_id; ?>_<?php echo $response['response_id']; ?>" value="<?php echo $response['response_id']; ?>" <?php echo ($userSelectedResponse ? 'disabled' : ''); ?> <?php echo ($submitted_response == $response['response_id'] ? 'checked' : ''); ?> required>
-    <label for="reponse_<?php echo $question_id; ?>_<?php echo $response['response_id']; ?>" style=""><?php echo $response['response_text']; ?></label>
-    <br>
-</div>
+                                            <input type="radio" name="reponse_<?php echo $question_id; ?>" id="reponse_<?php echo $question_id; ?>_<?php echo $response['response_id']; ?>" value="<?php echo $response['response_id']; ?>" <?php echo ($userSelectedResponse ? 'disabled' : ''); ?> <?php echo ($submitted_response == $response['response_id'] ? 'checked' : ''); ?>>
+                                            <label for="reponse_<?php echo $question_id; ?>_<?php echo $response['response_id']; ?>" style=""><?php echo $response['response_text']; ?></label>
+                                            <br>
+                                        </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
-                            <div class="display">
-                            <button class="button rounded-0 primary-bg text-white w-100 btn_1 show-correction-btn" data-question-id="<?php echo $question_id; ?>" type="button" onclick="showNextQuestionButton()">Afficher les réponses</button>
+                            <button class="button rounded-0 primary-bg text-white w-100 btn_1 show-correction-btn" data-question-id="<?php echo $question_id; ?>" type="button">Afficher les réponses</button>
                             <?php if (!$userSelectedResponse && $index < count($questions) - 1) : ?>
-                                <div id="next-question-container" style="display: none;">
-            <!-- The "Prochaine question" button will be displayed here -->
-            <button class="button rounded-0 primary-bg text-white w-100 btn_1 next-question-btn" data-question-number="<?php echo $index; ?>" type="button">Prochaine question</button>
-        </div>
+                                <div class="detials">
+                                    <button class="button rounded-0 primary-bg text-white w-100 btn_1 next-question-btn" data-question-number="<?php echo $index; ?>" type="button">السؤال القادم</button>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -114,8 +105,6 @@ if (isset($_GET['quiz'])) {
         <?php endif; ?>
     </div>
 </section>
-
-
 <script>
     
     const submitButton = document.querySelector('button[name="submit_quiz"]');
@@ -135,10 +124,12 @@ if (isset($_GET['quiz'])) {
         // Afficher le pourcentage dans l'alerte
         alert(`Bravo ! Vous avez répondu correctement à ${percentageCorrect.toFixed(2)}% des questions.`);
 
-        // Récupérer le quizId et le pourcentage de réponses correctes
         const quizId = document.getElementById('selected_quiz_id').value;
         const userId = <?php echo isset($userId) ? $userId : 'null'; ?>; // Récupérer l'ID de l'utilisateur depuis la variable PHP $userId
 
+        // Rediriger l'utilisateur vers la page de confirmation en incluant les informations nécessaires dans l'URL
+       
+ 
         // Enregistrer les résultats du quiz dans la base de données via une requête AJAX
         const formData = new FormData();
         formData.append('quizId', quizId);
@@ -146,21 +137,23 @@ if (isset($_GET['quiz'])) {
         formData.append('userId', userId); // Ajouter l'ID de l'utilisateur à la requête
 
         fetch('save_grade.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Résultats du quiz enregistrés avec succès dans la base de données.');
-                document.getElementById('quizForm').submit(); // Soumettre le formulaire après l'enregistrement réussi
-            } else {
-                console.error('Échec de l\'enregistrement des résultats du quiz dans la base de données.');
-            }
-        })
-        .catch(error => {
-            console.error('Une erreur s\'est produite lors de l\'enregistrement des résultats du quiz dans la base de données :', error);
-        });
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Résultats du quiz enregistrés avec succès dans la base de données.');
+            // Rediriger l'utilisateur vers la page de confirmation
+            window.location.href = data.redirect;
+        } else {
+            console.error('Échec de l\'enregistrement des résultats du quiz dans la base de données.');
+        }
+    })
+    .catch(error => {
+        console.error('Une erreur s\'est produite lors de l\'enregistrement des résultats du quiz dans la base de données :', error);
+    });
+    window.location.href = `confirmation.php?quiz=${quizId}&user=${userId}&percentage_correct=${percentageCorrect.toFixed(2)}`;
     });
 
 
@@ -215,12 +208,15 @@ if (isset($_GET['quiz'])) {
 
             button.disabled = true;
 
-            if (isAnyResponseIncorrect) {
-                alert("À refaire. Veuillez réviser vos réponses et essayer à nouveau.");
-            } else {
-                alert("Bravo ! Vous avez répondu correctement.");
-                totalCorrectResponses++;
-            }
+            if (!isAnyResponseIncorrect && isAnyResponseCorrect) {
+            alert("Bravo ! Vous avez répondu correctement.");
+            totalCorrectResponses++;
+        } else if (isAnyResponseIncorrect) {
+            alert("À refaire. Veuillez réviser vos réponses et essayer à nouveau.");
+        } else {
+            alert("vous devez selectionner une reponse ");
+        }
+
             if (currentQuestionNumber === questions.length - 1) {
             submitButton.style.display = 'block'; // Affiche le bouton "Soumettre le quiz" après avoir affiché la dernière réponse
         }
@@ -245,12 +241,5 @@ if (isset($_GET['quiz'])) {
             };
             xhr.send(`question_id=${questionId}&response_id=${responseId}`);
         });
-    }
-    function showNextQuestionButton() {
-        // Get the "Prochaine question" button container
-        const nextQuestionContainer = document.getElementById('next-question-container');
-        
-        // Show the "Prochaine question" button container
-        nextQuestionContainer.style.display = 'block';
     }
 </script>

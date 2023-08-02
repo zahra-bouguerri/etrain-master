@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       }
   }
   ?>
-<?php include "./config/connexion.php"?>
+
 <?php include "./includes/header.php"?>
 
     <!-- Header part end-->
@@ -183,14 +183,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <?php
 function getCountByNiveau($niveau) {
   global $conn;
-  $sql = "SELECT COUNT(*) as count FROM etudiant WHERE niveau = '$niveau'";
+  $sql = "SELECT COUNT(*) as count FROM étudiant WHERE annee = '$niveau'";
   $result = $conn->query($sql);
   $row = $result->fetch_assoc();
   return $row['count'];
 }
 function getTotalCount() {
     global $conn;
-    $sql = "SELECT COUNT(*) as count FROM etudiant";
+    $sql = "SELECT COUNT(*) as count FROM étudiant";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
     return $row['count'];
@@ -202,19 +202,19 @@ function getTotalCount() {
         <div class="row">
                 <div class="col-lg-3 col-sm-6">
                     <div class="single_member_counter">
-                        <span class="counter"><?php echo getCountByNiveau("premier"); ?></span>
+                        <span class="counter"><?php echo getCountByNiveau("الأولى ثانوي"); ?></span>
                         <h4>الأولى ثانوي</h4>
                     </div>
                 </div>
                 <div class="col-lg-3 col-sm-6">
                     <div class="single_member_counter">
-                    <span class="counter"><?php echo getCountByNiveau("dexieme"); ?></span>
+                    <span class="counter"><?php echo getCountByNiveau("الثانية ثانوي"); ?></span>
                         <h4> الثانية ثانوي</h4>
                     </div>
                 </div>
                 <div class="col-lg-3 col-sm-6">
                     <div class="single_member_counter">
-                    <span class="counter"><?php echo getCountByNiveau("troisieme"); ?></span>
+                    <span class="counter"><?php echo getCountByNiveau("الثالثة ثانوي"); ?></span>
                         <h4>الثالثة ثانوي</h4>
                     </div>
                 </div>
