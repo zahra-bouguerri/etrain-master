@@ -1,3 +1,4 @@
+
 <?php
 include "./includes/header.php";
 include "./includes/topmenu.php";
@@ -96,6 +97,8 @@ if (isset($_POST['Ajouter'])) {
       <select id="chapter" name="chapter" required>
         <option value="" disabled selected>اختر الوحدة التعليمية</option>
       </select>
+
+      
       <label for="subchapter">الوحدة الجزئية:</label>
       <input type="text" id="subchapter" name="Sunit" required>
       <button type="submit" name="addS">إضافة</button>
@@ -201,113 +204,100 @@ if (isset($_POST['addc'])) {
   }
 }
 ?>
-      
-
-
-
-          
           <!--start delete chapitre-->
-          <?php
-if (isset($_GET['delete'])) {
-    $chapter_id = $_GET['delete'];
 
-    // Check if there are any dependent "sous_chapitre" records
-    $checkQuery = "SELECT COUNT(*) as count FROM sous_chapitre WHERE chapter_id = ?";
-    $stmt = $conn->prepare($checkQuery);
-    $stmt->bind_param("s", $chapter_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $count = $row['count'];
-
-    if ($count > 0) {
-        // Display a message that related "sous_chapitre" records must be deleted first
-        echo "<script>alert('لا يمكن حذف الوحدة التعليمية لأنها تحتوي على وحدات جزئية. يرجى حذف الوحدات الجزئية أولاً.');</script>";
-    } else {
-        // No dependent records, proceed with the deletion
-        $deleteSql = "DELETE FROM chapitre WHERE chapter_id = ?";
-        $stmt = $conn->prepare($deleteSql);
-        $stmt->bind_param("s", $chapter_id);
-        $deleteResult = $stmt->execute();
-
-        if ($deleteResult) {
-            // Successful deletion
-            echo "<script>alert('تم حذف الوحدة التعليمية بنجاح.');</script>";
-       
-            exit();
-        } else {
-            // Deletion failed
-            echo "<script>alert('حدث خطأ أثناء حذف الوحدة التعليمية.');</script>";
-        }
-    }
-}
-
-// Fetch existing Filières from the database
-$fetchFiliereQuery2 = "SELECT * FROM Filière where year_id = 1";
-$fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
-?>
-            <!-- fenetre flottante delete -->
-            <div id="DeleteUnitModal" class="modal">
+<!-- fenetre flottante delete -->
+    <div id="DeleteUnitModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeDeleteUnitModal()">&times;</span>
         <h2>حذف الوحدة التعلمية:</h2>
-        <form>
+        <form id="deleteUnitForm" method="post">
             <label for="branch">الشعبة:</label><br>
             <select id="branch3" name="branch" required onchange="loadChapters3(this.value)">
-    <option value="" disabled selected>اختر الشعبة</option>
-    <?php
-    // Populate the select options with existing Filières
-    if ($fetchFiliereResult2->num_rows > 0) {
-        while ($row = $fetchFiliereResult2->fetch_assoc()) {
-            echo "<option value='" . $row['field_id'] . "'>" . $row['field_name'] . "</option>";
-        }
-    }
-    ?>
-</select><br>
-            <label for="branch">الوحدة التعلمية:</label>
-            <div class="responsive-table">
-                <table class="fs-15 w-full">
-                    <thead>
-                        <tr>
-                            <td>اسم الوحدة التعلمية:</td>
-                            <td> حذف</td>
-                        </tr>
-                    </thead>
-                    <tbody id="chapter-table-body">
-                        <?php
-                        // Your existing PHP code for fetching chapters will remain here
-                        $selectQuery3 = "SELECT * FROM chapitre";
-                        $result3 = $conn->query($selectQuery3);
-                        if ($result3 && $result3->num_rows > 0) {
-                            while ($row = $result3->fetch_assoc()) {
-                                ?>
-                                <tr class="chapter-row" data-filiere="<?php echo $row['filiere_id']; ?>">
-                                    <td><?php echo $row['chapter_name']; ?></td>
-                                    <td>
-                                        <a href="?delete=<?php echo $row['chapter_id']; ?>" onclick="return confirm('هل أنت متأكد من حذف هذه الوحدة التعلمية:')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                        <?php
-                            }
-                        } else {
-                            echo "<tr><td colspan='6'>لا توجد وحدة تعلمية</td></tr>";
-                        }
-                        ?>
-                    </tbody>
-                </table>
+            <option value="" disabled selected>اختر الشعبة</option>
+            <?php
+              // Exécutez la requête SQL pour sélectionner les noms des filières
+              $sql = "SELECT field_name, field_id FROM Filière where year_id=1";
+              $result = $conn->query($sql);
+
+              // Vérifiez s'il y a des résultats
+              if ($result->num_rows > 0) {
+                  // Parcourez les résultats et générez les options
+                  while ($row = $result->fetch_assoc()) {
+                      $field_id = $row['field_id'];
+                      $field_name = $row['field_name'];
+                      echo '<option value="' . $field_id . '">' . $field_name . '</option>';
+                  }
+              } else {
+                  echo '<option value="">Aucune filière trouvée</option>';
+              }
+        ?>
+    
+            </select><br>
+
+            <label for="unitName">اختر الوحدات التعليمية المراد حذفها </label>
+            <div id="sequenceSelection" >
+               <!-- Les cases à cocher seront générées dynamiquement en JavaScript -->
             </div>
+
+              
+      <button type="submit" name="supprimerSequence">حذف</button>
         </form>
     </div>
 </div>
+
+
+<?php
+if (isset($_POST['supprimerSequence'])) {
+// Vérifier si des subchapitre  ont été sélectionnés pour la suppression
+if (isset($_POST['sequencesToDelete']) && is_array($_POST['sequencesToDelete'])) {
+  // Récupérer les ID des cours sélectionnés pour la suppression
+  $sequencesToDelete = $_POST['sequencesToDelete'];
+
+  // Vérifier s'il existe des enregistrements liés dans les autres tables
+  $linkedRecords = array();
+  foreach ($sequencesToDelete as $sequenceId) {
+    $checkLinkedQuery = "SELECT * FROM sous_chapitre  WHERE chapter_id = '$sequenceId' LIMIT 1";
+    $linkedResult = $conn->query($checkLinkedQuery);
+    if ($linkedResult->num_rows > 0) {
+      $linkedRecords[] = $sequenceId;
+    }
+    // Vérifiez également les autres tables liées ici et ajoutez les ID de cours liés à $linkedRecords si nécessaire
+  }
+
+  if (!empty($linkedRecords)) {
+    // Certains cours ont des enregistrements liés, affichez le message d'erreur
+    $sequencesList = implode(", ", $linkedRecords);
+     echo "<script>alert(' لا يمكن حذف الوحدة لاانها تحتوي على وحدات جزئية يرجى حذفهم اولا');</script>";
+  } else {
+    // Aucun enregistrement lié trouvé, procédez à la suppression des cours
+    $sequenceIds = implode("','", $sequencesToDelete);
+    $deletesequencesQuery = "DELETE FROM chapitre WHERE chapter_id IN ('$sequenceIds')";
+    if ($conn->query($deletesequencesQuery)) {
+      echo "<script>alert('تم حذف الوحدات بنجاح.');</script>";
+    } else {
+      echo "Error: " . $conn->error;
+    }
+  }
+} else {
+  echo "<script>alert('يرجى تحديد الوحدات التي تريد حذفها.');</script>";
+}
+}
+?>
+
+
+
+
+
+
+
          <!--end delete chapitre-->
   
 <div id="DeletePartModal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeDeletePartModal()">&times;</span>
     <h2> حذف وحدة جزئية</h2>
-    <form>
+    <form id="DeleteSubChap" method="post">
       <label for="branch">الشعبة:</label>
       <select id="branch6" name="branch" required onchange="loadChapters5(this.value)">
         <option value="" disabled selected>اختر الشعبة</option>
@@ -334,56 +324,68 @@ $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
       <select id="chapter5" name="chapter" required onchange="loadSubchapters5(this.value)">
         <option value="" disabled selected>اختر الوحدة التعليمية</option>
       </select>
-      
-      <div class="responsive-table">
-        <table class="fs-15 w-full">
-          <thead>
-            <tr>
-              <td>اسم الوحدة الجزيئية:</td>
-              <td> حذف</td>
-            </tr>
-          </thead>
-          <tbody id="subchapter-table-body">
-            <?php
-            // Your existing PHP code for fetching sous chapitre will remain here
-            $selectQuery5 = "SELECT * FROM sous_chapitre";
-            $result5 = $conn->query($selectQuery5);
-            if ($result5 && $result5->num_rows > 0) {
-                while ($row = $result5->fetch_assoc()) {
-                    ?>
-                    <tr class="subchapter-row" data-chapitre="<?php echo $row['chapter_id']; ?>">
-                        <td><?php echo $row['subchapter_name']; ?></td>
-                        <td>
-                        <a href="delete=<?php echo $row['subchapter_id']; ?>" onclick="return confirm('هل أنت متأكد من حذف هذه الوحدة التعلمية:')">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </td>
-                    </tr>
-            <?php
-                }
-            } else {
-                echo "<tr><td colspan='6'> لا توجد وحدة الجزيئية</td></tr>";
-            }
-            ?>
-          </tbody>
-        </table>
+      <label for="unitName">اختر الوحدات الجزئية المراد حذفها </label>
+      <div id="subChapSelection" >
+        <!-- Les cases à cocher seront générées dynamiquement en JavaScript -->
       </div>
+    
+           
+            
       
       <button type="submit" name="deletesub">حذف</button>
     </form>
   </div>
 </div>
+<?php
+if (isset($_POST['deletesub'])) {
+  // Vérifier si des subchapitre  ont été sélectionnés pour la suppression
+  if (isset($_POST['subchaptersToDelete']) && is_array($_POST['subchaptersToDelete'])) {
+    // Récupérer les ID des cours sélectionnés pour la suppression
+    $subchaptersToDelete = $_POST['subchaptersToDelete'];
+
+    // Vérifier s'il existe des enregistrements liés dans les autres tables
+    $linkedRecords = array();
+    foreach ($subchaptersToDelete as $subchapterId) {
+      $checkLinkedQuery = "SELECT * FROM cours  WHERE subchapter_id = '$subchapterId' LIMIT 1";
+      $linkedResult = $conn->query($checkLinkedQuery);
+      if ($linkedResult->num_rows > 0) {
+        $linkedRecords[] = $suchapterId;
+      }
+      // Vérifiez également les autres tables liées ici et ajoutez les ID de cours liés à $linkedRecords si nécessaire
+    }
+  
+    if (!empty($linkedRecords)) {
+      // Certains cours ont des enregistrements liés, affichez le message d'erreur
+      $subchaptersList = implode(", ", $linkedRecords);
+       echo "<script>alert(' لا يمكن حذف الوحدة لاانها تحتوي على دروس يرجى حذفهم اولا');</script>";
+    } else {
+      // Aucun enregistrement lié trouvé, procédez à la suppression des cours
+      $subchapterIds = implode("','", $subchaptersToDelete);
+      $deletesubchaptersQuery = "DELETE FROM sous_chapitre WHERE subchapter_id IN ('$subchapterIds')";
+      if ($conn->query($deletesubchaptersQuery)) {
+        echo "<script>alert('تم حذف الوحدات بنجاح.');</script>";
+      } else {
+        echo "Error: " . $conn->error;
+      }
+    }
+  } else {
+    echo "<script>alert('يرجى تحديد الوحدات التي تريد حذفها.');</script>";
+  }
+}
+?>
 
 
-            <div id="DeleteCourModal" class="modal">
-              <div class="modal-content">
-                <span class="close" onclick="closeDeleteCourModal()">&times;</span>
-                <h2>حذف عنوان درس</h2>
-                
-                <form>
-                  <label for="branch">الشعبة:</label>
-                  <select id="branch7" name="branch" required onchange="loadChapters7(this.value)">
-                  <option value="" disabled selected>اختر الشعبة</option>
+
+
+<div id="DeleteCourModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeDeleteCourModal()">&times;</span>
+    <h2>حذف عنوان درس</h2>
+    
+    <form id="deleteCourseForm" method="post">
+      <label for="branch">الشعبة:</label>
+      <select id="branch7" name="branch" required onchange="loadChapters7(this.value)">
+        <option value="" disabled selected>اختر الشعبة</option>
         <?php
         // Exécutez la requête SQL pour sélectionner les noms des filières
         $sql = "SELECT field_name, field_id FROM Filière where year_id=1";
@@ -401,40 +403,73 @@ $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
             echo '<option value="">Aucune filière trouvée</option>';
         }
         ?>
-             </select>
+      </select>
 
-                  <label for="chapter">الوحدة التعلمية: </label>
-                  <select id="chapter7" name="chapter" required onchange="loadSubchapters7(this.value)">
-                  <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                 </select>
-                 
-  
-                  <label for="subchapter">الوحدة الجزيئية: </label>
-                  <select id="subchapter7" name="subchapter2" required>
-                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                  </select>
-  
-                  <label for="unitName">الاسئلة المراد حذفها</label>
-                  <div id="unitSelection">
-                    <input type="checkbox" name="unit" value="وحدة 1">وحدة 1<br>
-                    <input type="checkbox" name="unit" value="وحدة 2">وحدة 2<br>
-                    <input type="checkbox" name="unit" value="وحدة 3">وحدة 3<br>
-                    
-                  </div>
-                  <button type="submit">حذف</button>
-                </form>
-                 
-              </div>
-            </div>
-  
-             <!-- fenetre flottante eedit -->
-        <div id="EditUnitModal" class="modal">
+      <label for="chapter">الوحدة التعلمية: </label>
+      <select id="chapter7" name="chapter" required onchange="loadSubchapters7(this.value)">
+        <option value="" disabled selected>اختر الوحدة التعليمية</option>
+      </select>
+
+      <label for="subchapter">الوحدة الجزيئية: </label>
+      <select id="subchapter7" name="subchapter2" required onchange=" loadCours1(this.value)">
+        <option value="" disabled selected>اختر الوحدة الجزئية</option>
+      </select>
+
+      <label for="unitName">الدروس المراد حذفها</label>
+      <div id="unitSelection" >
+        <!-- Les cases à cocher seront générées dynamiquement en JavaScript -->
+      </div>
+      <button type="submit" name ="supprimerLecon">حذف</button>
+    </form>
+  </div>
+</div>
+<?php
+if (isset($_POST['supprimerLecon'])) {
+  // Vérifier si des cours ont été sélectionnés pour la suppression
+  if (isset($_POST['coursesToDelete']) && is_array($_POST['coursesToDelete'])) {
+    // Récupérer les ID des cours sélectionnés pour la suppression
+    $coursesToDelete = $_POST['coursesToDelete'];
+
+    // Vérifier s'il existe des enregistrements liés dans les autres tables
+    $linkedRecords = array();
+    foreach ($coursesToDelete as $courseId) {
+      $checkLinkedQuery = "SELECT * FROM quiz WHERE course_id = '$courseId' LIMIT 1";
+      $linkedResult = $conn->query($checkLinkedQuery);
+      if ($linkedResult->num_rows > 0) {
+        $linkedRecords[] = $courseId;
+      }
+      // Vérifiez également les autres tables liées ici et ajoutez les ID de cours liés à $linkedRecords si nécessaire
+    }
+
+    if (!empty($linkedRecords)) {
+      // Certains cours ont des enregistrements liés, affichez le message d'erreur
+      $coursesList = implode(", ", $linkedRecords);
+      echo "<script>alert('لا يمكن حذف الدروس التالية لأنها تحتوي على تقويمات أو فيديوهات أو ملفات PDF: $coursesList. يرجى حذفهم أولاً.');</script>";
+    } else {
+      // Aucun enregistrement lié trouvé, procédez à la suppression des cours
+      $courseIds = implode("','", $coursesToDelete);
+      $deleteCoursesQuery = "DELETE FROM cours WHERE course_id IN ('$courseIds')";
+      if ($conn->query($deleteCoursesQuery)) {
+        echo "<script>alert('تم حذف الدروس بنجاح.');</script>";
+      } else {
+        echo "Error: " . $conn->error;
+      }
+    }
+  } else {
+    echo "<script>alert('يرجى تحديد الدروس التي تريد حذفها.');</script>";
+  }
+}
+?>
+
+
+
+<div id="EditUnitModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeEditUnitModal()">&times;</span>
                 <h2>تعديل وحدة تعليمية</h2>
-                <form method="POST">
+                <form id= "EditSeqForm" method="post">
                   <label for="branch">الشعبة:</label>
-                  <select id="branch4" name="branch2" required onchange="loadChapters4(this.value)">
+                  <select id="branch4" name="branch2" required onchange="loadChapters6(this.value)">
                   <option value="" disabled selected>اختر الشعبة</option>
         <?php
         // Exécutez la requête SQL pour sélectionner les noms des filières
@@ -454,54 +489,82 @@ $fetchFiliereResult2 = $conn->query($fetchFiliereQuery2);
         }
         ?>
              </select>
-
-                  <label for="chapter">الوحدة التعلمية: </label>
-                  <select id="chapter4" name="chapter2" required >
-                  <option value="" disabled selected>اختر الوحدة التعليمية</option>
-                 </select>
-  
-                  <label for="unitName">ادخل اسم الوحدة الجديدة :</label>
-                  <input type="text" id="unitName" name="newchapter" required>
-  
-                  <button type="submit" name="updateChapter">تعديل</button>
+                  <label for="branch">الوحدة التعلمية: </label>
+                  <select id="chapter6" name="chapter" required >
+                  <option value="" disabled selected>    اختر الوحدة التعليمية المراد تعديلها</option>
+                </select>
+                  
+                  <label for="unitName">  الوحدة التعليمية  الجديدة </label>
+                  <input type="text" id="unitName" name="unitName" >
+                  <label for="cours"> حالة  </label>
+                <select name="etat" class="niveau" >
+                  <option value=""> --اختر--</option>
+                  <option value=""> <option>
+                 <option value=" جديد"> جديد</option>
+                </select>
+                  <button type="submit" name ="modifiersequence">تعديل</button>
+                 
                 </form>
               </div>
             </div>
             <?php
-// Check if the form has been submitted
-if (isset($_POST['updateChapter'])) {
-  // Get the updated chapter name and chapter ID from the form
-  $newChapterName = $_POST['newchapter'];
-  $chapterName = $_POST['chapter2'];
-  $branchName= $_POST['branch2'];
+// Assurez-vous que vous avez une connexion à la base de données établie avant cette partie du code.
 
-  // Perform the database update to change the chapter name
-  // Assuming you have already established a connection to the database
+if (isset($_POST['modifiersequence'])) {
+    // Récupérer les valeurs des champs du formulaire
+    $branchId = $_POST['branch2'];
+    $chapterId = $_POST['chapter'];
+    $newSubchapterName = $_POST['unitName'];
+    $newEtat = $_POST['etat'];
 
-    // Update record in database
-    $updateQuery = "UPDATE chapitre 
-    INNER JOIN Filière ON chapitre.filiere_id = Filière.field_id
-    SET chapitre.chapter_name = '$newChapterName' 
-    WHERE chapitre.chapter_name = '$chapterName' AND Filière.field_name = '$branchName'";
-    $results = mysqli_query($conn, $updateQuery);
+    // Vérifier si la sous-unité existe déjà dans la base de données pour cette branche et ce chapitre
+    $checkQuery = "SELECT * FROM chapitre WHERE chapter_name = '$newSubchapterName'  AND chapter_id = '$branchId'";
+    $checkResult = $conn->query($checkQuery);
 
-    // Check if update was successful
-    if (mysqli_affected_rows($conn) > 0) {
-        
-    echo "<script>alert('chapitre name update succesfuly');";
-        exit;
-    } else {
-        // Display error message
-        echo "Error updating record: " . mysqli_error($conn);
+    if ($checkResult->num_rows > 0) {
+        echo "<script>alert('هذه الوحدة التعليمية موجودة بالفعل في الشعبة والوحدة التعلمية المحددة.');</script>";
+      } else {
+        // Construire la requête de mise à jour pour inclure uniquement les champs modifiés
+        $updateQuery = "UPDATE chapitre SET";
+
+        // Si un nouveau nom de sous-unité a été fourni, inclure le champ name dans la requête de mise à jour
+        if (!empty($newSubchapterName)) {
+            $updateQuery .= " chapter_name = '$newSubchapterName',";
+        }
+
+        // Vérifier si un nouvel état a été fourni ou si l'option "vide" a été sélectionnée
+        if ($newEtat !== 'vide') {
+            // Inclure le champ etat dans la requête de mise à jour
+            $updateQuery .= " etat = '$newEtat',";
+        } else {
+            // Sinon, mettre le champ etat à une valeur vide ou null dans la base de données (selon le schéma de la base de données)
+            $updateQuery .= " etat = '',"; // or $updateQuery .= " etat = NULL,"; if your schema allows NULL values
+        }
+
+        // Supprimer la dernière virgule dans la requête de mise à jour
+        $updateQuery = rtrim($updateQuery, ',');
+
+        // Ajouter la condition WHERE pour mettre à jour uniquement le chapitre spécifié
+        $updateQuery .= " WHERE chapter_id = '$chapterId'";
+
+        // Exécuter la requête de mise à jour
+        if ($conn->query($updateQuery) === TRUE) {
+            echo "<script>alert('تم تعديل الوحدة الجزئية بنجاح.');</script>";
+        } else {
+            echo "Erreur : " . $conn->error;
+        }
     }
-  }
+}
+
 ?>
 
-            <div id="EditPartModal" class="modal">
+
+
+   <div id="EditPartModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeEditPartModal()">&times;</span>
                 <h2> تعديل وحدة جزئية</h2>
-                <form>
+                <form id="editPartForm" method="post">
                   <label for="branch">الشعبة:</label>
                   <select id="branch5" name="branch" required onchange="loadChapters6(this.value)">
                   <option value="" disabled selected>اختر الشعبة</option>
@@ -525,27 +588,90 @@ if (isset($_POST['updateChapter'])) {
              </select>
                   <label for="branch">الوحدة التعلمية: </label>
                   <select id="chapter6" name="chapter" required onchange="loadSubchapters6(this.value)">
-        <option value="" disabled selected>اختر الوحدة التعليمية</option>
-      </select>
+                  <option value="" disabled selected>اختر الوحدة التعليمية</option>
+                </select>
                   <label for="branch">الوحدة الجزيئية  المراد تعديلها</label>
-                  <select id="subchapter6" name="branch" required>
+                  <select id="subchapter6" name="subchapter" required>
                     <option value="" disabled selected>اختر الوحدة الجزئية</option>
-                    <option value="علوم تجريبية">وحدة</option>
-                    <option value="اداب">وحدة</option>
+                
                   </select>
                   <label for="unitName">  الوحدة الجزيئية  الجديدة </label>
-                  <input type="text" id="unitName" name="unitName" required>
-                  <button type="submit">تعديل</button>
+                  <input type="text" id="unitName" name="unitName" >
+                  <label for="cours"> حالة  </label>
+                <select name="etat" class="niveau" >
+                  <option value=""> --اختر--</option>
+                  <option value=""> <option>
+                 <option value=" جديد"> جديد</option>
+                </select>
+                  <button type="submit" name ="modifierSequence">تعديل</button>
                 </form>
               </div>
             </div>
-  
+            <?php
+// Assurez-vous que vous avez une connexion à la base de données établie avant cette partie du code.
+
+if (isset($_POST['modifierSequence'])) {
+    // Récupérer les valeurs des champs du formulaire
+    $branchId = $_POST['branch'];
+    $chapterId = $_POST['chapter'];
+    $subchapterId = $_POST['subchapter'];
+    $newSubchapterName = $_POST['unitName'];
+    $newEtat = $_POST['etat'];
+
+    // Vérifier si la sous-unité existe déjà dans la base de données pour cette branche et ce chapitre
+    $checkQuery = "SELECT * FROM sous_chapitre WHERE subchapter_name = '$newSubchapterName' AND chapter_id = '$chapterId'";
+    $checkResult = $conn->query($checkQuery);
+
+    if ($checkResult->num_rows > 0) {
+        echo "<script>alert('هذه الوحدة الجزئية موجودة بالفعل في الشعبة والوحدة التعلمية المحددة.');</script>";
+    } else {
+        // Construire la requête de mise à jour pour inclure uniquement les champs modifiés
+        $updateQuery = "UPDATE sous_chapitre SET";
+
+        // Si un nouveau nom de sous-unité a été fourni, inclure le champ subchapter_name dans la requête de mise à jour
+        if (!empty($newSubchapterName)) {
+            $updateQuery .= " subchapter_name = '$newSubchapterName',";
+        }
+
+        // Si un nouvel état a été fourni (non vide et différent du champ "vide"), inclure le champ etat dans la requête de mise à jour
+        if ($newEtat !== '' && $newEtat !== 'vide') {
+            $updateQuery .= " etat = '$newEtat',";
+        }
+
+        // Supprimer la dernière virgule dans la requête de mise à jour
+        $updateQuery = rtrim($updateQuery, ',');
+
+        // Ajouter la condition WHERE pour mettre à jour uniquement le sous-chapitre spécifié
+        $updateQuery .= " WHERE subchapter_id = '$subchapterId'";
+
+        // Exécuter la requête de mise à jour
+        if ($conn->query($updateQuery) === TRUE) {
+            echo "<script>alert('تم تعديل الوحدة الجزئية بنجاح.');</script>";
+        } else {
+            echo "Erreur : " . $conn->error;
+        }
+    }
+}
+       
+      
+?>
+
+
+
+
+
+
+
+
+
+
+
             <div id="EditCourModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeEditCourModal()">&times;</span>
                 <h2>تعديل عنوان درس</h2>
                 
-                <form>
+                <form id="editModelForm" method="post">
                   <label for="branch">الشعبة:</label>
                   <select id="branch8" name="branch" required onchange="loadChapters8(this.value)">
                   <option value="" disabled selected>اختر الشعبة</option>
@@ -575,16 +701,22 @@ if (isset($_POST['updateChapter'])) {
                  
   
                   <label for="subchapter">الوحدة الجزيئية: </label>
-                  <select id="subchapter8" name="subchapter2" required onchange="loadCours1(this.value)">
+                  <select id="subchapter8" name="subchapter2" required onchange="loadCours2(this.value)">
                    <option value="" disabled selected>اختر الوحدة الجزئية</option>
                </select>
-                  <label >عنوان درس المراد تعديله</label>
-                  <select id="cours1" name="cours" required>
+                  <label >عنوان الدرس المراد تعديله</label>
+                  <select id="coursUpdate" name="cours" required>
                   <option value="" disabled selected>اختر درس</option>
                </select>
-                  <label > العنوان درس  الجديد</label>
-                  <input type="text" id="unitName" name="unitName" required>
-                  <button type="submit">تعديل</button>
+                  <label > عنوان الدرس  الجديد</label>
+                  <input type="text" id="unitName" name="unitName" >
+                  <label for="cours"> حالة  </label>
+                <select name="etat" class="niveau" >
+                  <option value=""> --اختر--</option>
+                  <option value=""> <option>
+                 <option value=" جديد"> جديد</option>
+                </select>
+                  <button type="submit" name="modifiercour">تعديل</button>
                 </form>
               </div>
             
@@ -592,6 +724,49 @@ if (isset($_POST['updateChapter'])) {
  
       </div>
     </div>
+    <!-- PHP -->
+<?php
+if (isset($_POST['modifiercour'])) {
+  $selectedCoursId = $_POST['cours'];
+  $newCoursTitle = $_POST['unitName'];
+  $newEtat = $_POST['etat'];
+
+  // Vérifier si le titre du cours existe déjà pour un autre cours
+  $checkQuery = "SELECT * FROM cours WHERE course_name = '$newCoursTitle' AND course_id != '$selectedCoursId'";
+  $checkResult = $conn->query($checkQuery);
+
+  if ($checkResult->num_rows > 0) {
+      echo "<script>alert('عفوًا ، يوجد بالفعل درس آخر بنفس العنوان. الرجاء اختيار عنوان جديد.');</script>";
+  } else {
+      // Construire la requête de mise à jour pour inclure uniquement les champs modifiés
+      $updateQuery = "UPDATE cours SET";
+
+      // Si un nouveau titre de cours a été fourni, inclure le champ course_name dans la requête de mise à jour
+      if (!empty($newCoursTitle)) {
+          $updateQuery .= " course_name = '$newCoursTitle',";
+      }
+
+      // Si un nouvel état a été fourni (non vide et différent du champ "vide"), inclure le champ etat dans la requête de mise à jour
+      if ($newEtat !== '' && $newEtat !== 'vide') {
+          $updateQuery .= " etat = '$newEtat',";
+      }
+
+      // Supprimer la dernière virgule dans la requête de mise à jour
+      $updateQuery = rtrim($updateQuery, ',');
+
+      // Ajouter la condition WHERE pour mettre à jour uniquement le cours spécifié
+      $updateQuery .= " WHERE course_id = '$selectedCoursId'";
+
+      // Exécuter la requête de mise à jour
+      if ($conn->query($updateQuery) === TRUE) {
+          echo "<script>alert('تم تعديل عنوان الدرس بنجاح.');</script>";
+      } else {
+          echo "Erreur : " . $conn->error;
+      }
+  }
+}
+?>
+
      
 </body>
    <script src="./assets/js/script.js"></script>
@@ -665,71 +840,34 @@ function loadChapters3(branchId) {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var chapters = JSON.parse(this.responseText);
-      var chapterSelect = document.getElementById('chapter-table-body');
-      
-      // Clear the chapter table body before populating
-      chapterSelect.innerHTML = '';
+      var sequenceSelection = document.getElementById('sequenceSelection');
 
-      // Populate the chapter table with the filtered chapters
+      // Clear previous checkboxes
+      sequenceSelection.innerHTML = '';
+
+      // Generate checkboxes for the chapters
       for (var i = 0; i < chapters.length; i++) {
-        var row = document.createElement('tr');
-        row.setAttribute('class', 'chapter-row');
-        row.setAttribute('data-filiere', chapters[i].filiere_id);
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'sequencesToDelete[]'; // The name with [] allows sending as an array in POST
+        checkbox.value = chapters[i].chapter_id;
+        checkbox.id = 'sequence_' + chapters[i].chapter_id;
 
-        var chapterNameCell = document.createElement('td');
-        chapterNameCell.textContent = chapters[i].chapter_name;
+        var label = document.createElement('label');
+        label.innerHTML = chapters[i].chapter_name;
+        label.setAttribute('for', 'sequence_' + chapters[i].chapter_id);
 
-        var deleteCell = document.createElement('td');
-        var deleteLink = document.createElement('a');
-        deleteLink.setAttribute('href', '?delete=' + chapters[i].chapter_id);
-        deleteLink.setAttribute('onclick', "return confirm('هل أنت متأكد من حذف هذه الوحدة التعلمية:')");
-
-        var deleteIcon = document.createElement('i');
-        deleteIcon.setAttribute('class', 'fas fa-trash-alt');
-
-        deleteLink.appendChild(deleteIcon);
-        deleteCell.appendChild(deleteLink);
-
-        row.appendChild(chapterNameCell);
-        row.appendChild(deleteCell);
-        chapterSelect.appendChild(row);
-      }
-    }
-  };
-  xhttp.open("GET", "get_chapters.php?branchId=" + branchId, true);
-  xhttp.send();
-} 
-
-function loadChapters4(branchId) {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var chapters = JSON.parse(this.responseText);
-      var chapterSelect = document.getElementById('chapter4');
-
-      // Clear the select options before populating
-      chapterSelect.innerHTML = '';
-
-      // Add the initial empty and disabled option
-      var initialOption = document.createElement('option');
-      initialOption.value = "";
-      initialOption.disabled = true;
-      initialOption.selected = true;
-      initialOption.textContent = "اختر الوحدة التعليمية";
-      chapterSelect.appendChild(initialOption);
-
-      // Populate the select with the filtered chapters
-      for (var i = 0; i < chapters.length; i++) {
-        var option = document.createElement('option');
-        option.value = chapters[i].chapter_id;
-        option.text = chapters[i].chapter_name;
-        chapterSelect.appendChild(option);
+        sequenceSelection.appendChild(checkbox);
+        sequenceSelection.appendChild(label);
+        sequenceSelection.appendChild(document.createElement('br'));
       }
     }
   };
   xhttp.open("GET", "get_chapters.php?branchId=" + branchId, true);
   xhttp.send();
 }
+
+
 
 function loadChapters5(branchId) {
   var xhttp = new XMLHttpRequest();
@@ -771,6 +909,7 @@ function loadChapters6(branchId) {
 
       // Clear the select options before populating
       chapterSelect.innerHTML = '';
+
 
       // Add the initial empty and disabled option
       var initialOption = document.createElement('option');
@@ -828,40 +967,38 @@ function loadSubchapters5(chapitreId) {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var subchapters = JSON.parse(this.responseText);
-      var subchapterSelect = document.getElementById('subchapter-table-body');
-      
-      // Clear the subchapter table body before populating
-      subchapterSelect.innerHTML = '';
+      var subChapSelection = document.getElementById('subChapSelection');
 
-      // Populate the subchapter table with the filtered subchapters
+      // Clear the previous checkboxes before populating
+      subChapSelection.innerHTML = '';
+
+      // Populate the div with the checkboxes for the subchapters
       for (var i = 0; i < subchapters.length; i++) {
-        var row = document.createElement('tr');
-        row.setAttribute('class', 'subchapter-row');
-        row.setAttribute('data-chapitre', subchapters[i].subchapter_id);
+        var subchapter = subchapters[i];
 
-        var chapterNameCell = document.createElement('td');
-        chapterNameCell.textContent = subchapters[i].subchapter_name;
+        // Create a new checkbox for each subchapter
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'subchaptersToDelete[]';
+        checkbox.value = subchapter.subchapter_id;
+        checkbox.id = 'subchapter' + subchapter.subchapter_id;
 
-        var deleteCell = document.createElement('td');
-        var deleteLink = document.createElement('a');
-        deleteLink.setAttribute('href', '?delete=' + subchapters[i].subchapter_id);
-        deleteLink.setAttribute('onclick', "return confirm('هل أنت متأكد من حذف هذه الوحدة التعلمية:')");
+        // Create a label for the checkbox
+        var label = document.createElement('label');
+        label.htmlFor = 'subchapter' + subchapter.subchapter_id;
+        label.textContent = subchapter.subchapter_name;
 
-        var deleteIcon = document.createElement('i');
-        deleteIcon.setAttribute('class', 'fas fa-trash-alt');
-
-        deleteLink.appendChild(deleteIcon);
-        deleteCell.appendChild(deleteLink);
-
-        row.appendChild(chapterNameCell);
-        row.appendChild(deleteCell);
-        subchapterSelect.appendChild(row);
+        // Append the checkbox and the label to the div
+        subChapSelection.appendChild(checkbox);
+        subChapSelection.appendChild(label);
+        subChapSelection.appendChild(document.createElement('br')); // Line break for spacing
       }
     }
   };
   xhttp.open("GET", "get_schapters.php?chapitreId=" + chapitreId, true);
   xhttp.send();
 }
+
 function loadSubchapters6(chapitreId) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -922,16 +1059,17 @@ function loadSubchapters7(chapitreId) {
   xhttp.open("GET", "get_schapters.php?chapitreId=" + chapitreId, true);
   xhttp.send();
 }
+
 function loadSubchapters8(chapitreId) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var subchapters = JSON.parse(this.responseText);
       var subchapterSelect = document.getElementById('subchapter8');
-      
+
       // Clear the select options before populating
       subchapterSelect.innerHTML = '';
-      
+
       // Add the initial empty and disabled option
       var initialOption = document.createElement('option');
       initialOption.value = "";
@@ -947,11 +1085,17 @@ function loadSubchapters8(chapitreId) {
         option.text = subchapters[i].subchapter_name;
         subchapterSelect.appendChild(option);
       }
+
+      // Once the subchapters are loaded, load the corresponding courses for the selected subchapter
+      var selectedSubchapterId = subchapterSelect.value;
+      loadCours2(selectedSubchapterId);
     }
   };
   xhttp.open("GET", "get_schapters.php?chapitreId=" + chapitreId, true);
   xhttp.send();
 }
+
+
 
 
 function loadChapters7(branchId) {
@@ -1020,7 +1164,39 @@ function loadCours1(subchapterId) {
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       var courses = JSON.parse(this.responseText);
-      var coursSelect = document.getElementById('cours1');
+      var unitSelection = document.getElementById('unitSelection');
+
+      // Clear previous checkboxes
+      unitSelection.innerHTML = '';
+
+      // Generate checkboxes for the courses
+      for (var i = 0; i < courses.length; i++) {
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'coursesToDelete[]'; // The name with [] allows sending as an array in POST
+        checkbox.value = courses[i].course_id;
+        checkbox.id = 'course_' + courses[i].course_id;
+
+        var label = document.createElement('label');
+        label.innerHTML = courses[i].course_name;
+        label.setAttribute('for', 'course_' + courses[i].course_id);
+
+        unitSelection.appendChild(checkbox);
+        unitSelection.appendChild(label);
+        unitSelection.appendChild(document.createElement('br'));
+      }
+    }
+  };
+  xhttp.open("GET", "get_cours.php?subchapterId=" + subchapterId, true);
+  xhttp.send();
+}
+
+function loadCours2(subchapterId) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      var courses = JSON.parse(this.responseText);
+      var coursSelect = document.getElementById('coursUpdate');
 
       // Clear the select options before populating
       coursSelect.innerHTML = '';
@@ -1030,7 +1206,7 @@ function loadCours1(subchapterId) {
       initialOption.value = "";
       initialOption.disabled = true;
       initialOption.selected = true;
-      initialOption.textContent = "اختر الدرس";
+      initialOption.textContent = "اختر درس";
       coursSelect.appendChild(initialOption);
 
       // Populate the select with the filtered cours
@@ -1045,5 +1221,8 @@ function loadCours1(subchapterId) {
   xhttp.open("GET", "get_cours.php?subchapterId=" + subchapterId, true);
   xhttp.send();
 }
+
+
+
 </script>
 </html>

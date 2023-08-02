@@ -21,7 +21,7 @@ border: 1px solid #ccc; /* Ajouter une bordure aux inputs */
 border-radius: 5px; /* Ajouter une bordure arrondie aux inputs */
 }
 
-button[type="submit"] {
+button[type="submit"],.cc {
 padding: 10px 20px; /* Augmenter la taille du padding */
 background-color: #cfa7c6;
 color: white;
@@ -30,7 +30,7 @@ border-radius: 5px; /* Ajouter une bordure arrondie au bouton */
 cursor: pointer;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover,.cc:hover {
 background-color: #e827bb;
 }
 

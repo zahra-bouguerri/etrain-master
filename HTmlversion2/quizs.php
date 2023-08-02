@@ -8,7 +8,7 @@ if (!is_dir($targetDir)) {
 }
 
 // Fonction pour insérer le quiz dans la base de données
-function ajouterQuiz($quizName, $courseId, $questions, $img, $choices, $correctAnswers)
+function ajouterQuiz($quizName, $courseId, $questions, $img, $allChoices, $correctAnswers)
 {
     global $conn;
 
@@ -16,7 +16,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $choices, $correctA
     $result = mysqli_query($conn, $checkQuizQuery);
 
     if (mysqli_num_rows($result) > 0) {
-        echo "<script>alert('Un quiz avec le même nom et le même cours existe déjà. Veuillez choisir un nom de quiz différent.');</script>";
+        echo "<script>alert('هناك اختبار بنفس الاسم ونفس الدورة موجود بالفعل. يُرجى اختيار اسم اختبار مختلف.');</script>";
         return; // Exit the function if the quiz already exists
     }
 
@@ -26,18 +26,19 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $choices, $correctA
 
     for ($i = 0; $i < count($questions); $i++) {
         $questionText = $questions[$i];
-    
-        // Upload the image to a folder on the server
-        $targetDir = "upload/"; // Change the folder path as per your requirement
-        $targetFile = $targetDir . basename($_FILES["question_img"]["name"][$i]);
-        move_uploaded_file($_FILES["question_img"]["tmp_name"][$i], $targetFile);
+
+  // Upload the image to a folder on the server
+  $targetDir = "upload/"; // Change the folder path as per your requirement
+  $targetFile = $targetDir . basename($_FILES["question_img"]["name"][$i]);
+  move_uploaded_file($_FILES["question_img"]["tmp_name"][$i], $targetFile);
+ 
 
 
         $checkQuestionQuery = "SELECT question_id FROM question WHERE question_text = '$questionText' AND quiz_id = $quizId";
         $result = mysqli_query($conn, $checkQuestionQuery);
-    
+
         if (mysqli_num_rows($result) > 0) {
-            echo "<script>alert('azer.');</script>";
+           
             return; // Exit the function if the quiz already exists
         }
         // Insert question data into the database
@@ -45,15 +46,18 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $choices, $correctA
         mysqli_query($conn, $insertQuestionQuery);
         $questionId = mysqli_insert_id($conn);
 
-        for ($j = 0; $j < count($choices[$i]); $j++) {
-            $choiceText = $choices[$i][$j];
-            $isCorrect = $correctAnswers[$i][$j] ? 1 : 0;
-            $insertResponseQuery = "INSERT INTO response (response_text, question_id, is_correct) VALUES ('$choiceText', $questionId, $isCorrect)";
-            mysqli_query($conn, $insertResponseQuery);
-        }
+        $questionChoices = $allChoices[$i];
+        $correctChoiceIndex = $correctAnswers[$i];
+        for ($j = 0; $j < count($questionChoices); $j++) {
+            $choiceText = $questionChoices[$j];
+            $choiceIsCorrect = in_array($j, $correctChoiceIndex) ? 1 : 0; // Vérifier si la case à cocher avec la valeur $j est cochée
+            if (!empty($choiceText)) {
+            $insertResponseQuery = "INSERT INTO response (response_text, question_id, is_correct) VALUES ('$choiceText', $questionId, $choiceIsCorrect)";
+            mysqli_query($conn, $insertResponseQuery);}
+        }   
     }
 
-    echo "<script>alert('Le quiz a été ajouté avec succès.')";
+    echo "<script>alert('تمت إضافة الاختبار بنجاح..')</script>";
 }
 
 // Vérifier si le formulaire a été soumis
@@ -62,92 +66,117 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
     $quizName = $_POST["quiz_name"];
     $courseId = $_POST["course_id"];
     $questions = $_POST["question_text"];
-   $img = isset($_FILES["question_img"]) ? $_FILES["question_img"]["tmp_name"] : [];
+    $img = isset($_FILES["question_img"]) ? $_FILES["question_img"]["tmp_name"] : [];
     $choices = $_POST["choice_text"];
-    $correctAnswers = $_POST["is_correct"];
- // Appeler la fonction pour ajouter le quiz
- ajouterQuiz($quizName, $courseId, $questions,$img, $choices, $correctAnswers);
-}
 
+    // Le tableau des réponses correctes
+    $correctAnswers = array();
+
+    foreach ($_POST["is_correct"] as $questionIndex => $correctAnswer) {
+        foreach ($correctAnswer as $choiceIndex) {
+            $correctAnswers[$questionIndex][] = intval($choiceIndex);
+        }
+    }
+
+    // Appeler la fonction pour ajouter le quiz
+    ajouterQuiz($quizName, $courseId, $questions, $img, $choices, $correctAnswers);
+}
 ?>
 
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
-
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Clavier en ligne</title>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لوحة التحكم</title>
-  <link rel="stylesheet" href="./assets/css/all.min.css" />
-  <link rel="stylesheet" href="./assets/css/framework.css" />
-  <link rel="stylesheet" href="./assets/css/master.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mathquill/0.10.1/mathquill.min.css" />
+    <!-- Mettez ici les balises meta, title, CSS, etc. -->
 </head>
+<style>
+    .response-container {
+        margin-bottom: 10px;
+    }
 
+    .response-container input[type="text"] {
+        width: 1100px; /* Largeur initiale */
+    }
+
+    .response-container label {
+        display: block;
+    }
+
+    
+
+    .supprimer-reponse {
+        margin-top: 5px;
+    }
+</style>
 <body>
-  <div class="responsive-table">
+<div class="responsive-table">
     <div id="question-container">
-      <div class="content w-full">
-        <div class="projects p-20 bg-white rad-10 m-20">
-          <h2 class="mt-0 mb-20">اضافة تقويم جديد</h2>
-          <form method="POST" enctype="multipart/form-data">
-            <input type="text" class="input-field" name="quiz_name" placeholder="عنوان التقويم">
-            <select class="select-field" name="course_id">
-            <option value="" disabled selected>اختر الدرس </option>
-            <?php
-              $sql = "SELECT course_name, course_id FROM cours";
-              $result = $conn->query($sql);
+        <div class="content w-full">
+            <div class="projects p-20 bg-white rad-10 m-20">
+                <h2 class="mt-0 mb-20">اضافة تقويم جديد</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="text" class="input-field" name="quiz_name" placeholder="عنوان التقويم">
+                    <select class="select-field" name="course_id">
+                        <option value="" disabled selected>اختر الدرس </option>
+                        <?php
+                        $sql = "SELECT course_name, course_id FROM cours";
+                        $result = $conn->query($sql);
 
-              if ($result->num_rows > 0) {
-                  while ($row = $result->fetch_assoc()) {
-                      $coursName = $row['course_name'];
-                      $coursId = $row['course_id'];
-                      echo '<option value="' . $coursId . '">' . $coursName . '</option>';
-                  }
-              } else {
-                  echo '<option value="">Aucun cours trouvé</option>';
-              }
-              ?>
-            </select>
-            <div id="main-container">
-              <div id="question-container-1">
-                <h2>السؤال 1</h2>
-                <textarea class="textarea-field" name="question_text[]" placeholder="نص السؤال"></textarea>
-                <h2>الاختيارات </h2>
-                <div class="input-container">
-                  <label class="checkbox-container">
-                    <input type="checkbox" name="is_correct[0][]" value="1">
-                    <span class="checkmark"></span>
-                  </label>
-                  <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
-                  <button type="button" class="delete-choice-btn">&#10005;</button>
-                </div>
-                <div class="input-container">
-                  <label class="checkbox-container">
-                    <input type="checkbox" name="is_correct[0][]" value="0">
-                    <span class="checkmark"></span>
-                  </label>
-                  <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
-                  <button type="button" class="delete-choice-btn">&#10005;</button>
-                </div>
-                <button type="button" class="add-choice-btn" data-container="1">اضافة اختيار</button>
-              </div>
-            </div>
-            <div class="input-container" id="file-upload">
-                        <h2>صورة:</h2><br>
-                        <input type="file" name="question_img[]" id="file" >
-             </div>  
-            <button type="button" id="add-question-btn">اضافة سؤال</button>
-            <button type="submit" name="ajouter_quiz">إضافة الاختبار</button>
-          </form>
-         
-          </br>
-            <div class="keyboard">
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                                $coursName = $row['course_name'];
+                                $coursId = $row['course_id'];
+                                echo '<option value="' . $coursId . '">' . $coursName . '</option>';
+                            }
+                        } else {
+                            echo '<option value="">Aucun cours trouvé</option>';
+                        }
+                        ?>
+                    </select>
+                    <div id="main-container">
+                        <!-- Code pour afficher le premier champ de question -->
+                        <div id="question-container-1">
+                            <h2>السؤال 1</h2>
+                            <textarea class="textarea-field" name="question_text[0]" placeholder="نص السؤال"></textarea>
+                            <h2>الصورة</h2>
+                            <input type="file" name="question_img[]" id="file" ><br>
+                            <h2>الاختيارات</h2>
+                            <div class="input-container">
+                                <label class="radio-container">
+                                    <input type="radio" name="is_correct[0][]" value="0">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
+                                <!-- Bouton "Supprimer réponse" pour supprimer cette réponse -->
+                                
+                            </div>
+                            <div class="input-container">
+                                <label class="radio-container">
+                                    <input type="radio" name="is_correct[0][]" value="1">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
+                                <!-- Bouton "Supprimer réponse" pour supprimer cette réponse -->
+                             
+                            </div>
+                            <div class="input-container">
+                                <label class="radio-container">
+                                    <input type="radio" name="is_correct[0][]" value="2">
+                                    <span class="checkmark"></span>
+                                </label>
+                                <input type="text" class="input-field" name="choice_text[0][]" placeholder="اختيار">
+                                <!-- Bouton "Supprimer réponse" pour supprimer cette réponse -->
+                               
+                            </div>
+                            <!-- Bouton "Ajouter question" pour ajouter une nouvelle question -->
+                            <button type="button" class="ajouter-question cc">اضافة سؤال </button>
+                            <!-- Add a button for inserting the math keyboard symbol -->
+                            <button type="button" class="insert-math-symbol cc"> اضافة رمز </button>
+                        </div>
+                       
+                    </div>
+                    <button type="submit" name="ajouter_quiz">إضافة الاختبار</button>
+                </form>
+                <div class="keyboard">
                 <button onclick="insertSymbol('-')">-</button>
                 <button onclick="insertSymbol('+')">+</button>
                 <button onclick="insertSymbol('−')">−</button>
@@ -346,251 +375,112 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
               <!-- Ajoutez d'autres boutons de clavier avec les symboles correspondants -->
             </div>
 
-          
-          </div>
+            </div>
         </div>
-      </div>
-
     </div>
+</div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      let activeInput = null;
+<script>
+    
+     
+    $(document).ready(function() {
+        // Compteur pour suivre le nombre de questions ajoutées
+        var questionCount = 1;
 
-      $('#question-container').on('focus', '.input-field, .textarea-field', function() {
-        activeInput = this;
-      });
+        // Lorsque le bouton "Ajouter question" est cliqué
+        $(document).on("click", ".ajouter-question", function() {
+            questionCount++;
 
-      $('#question-container').on('click', '.keyboard-button', function() {
-        const symbol = $(this).data('symbol');
-        insertSymbol(symbol);
-      });
+            // Récupérer l'ID du conteneur de la question actuelle
+            var currentQuestionContainerId = $(this).parent().attr("id");
 
-      function insertSymbol(symbol) {
-        if (activeInput) {
-          const startPos = activeInput.selectionStart || 0;
-          const endPos = activeInput.selectionEnd || 0;
-          const text = activeInput.value;
-          activeInput.value = text.slice(0, startPos) + symbol + text.slice(endPos);
-          activeInput.setSelectionRange(startPos + symbol.length, startPos + symbol.length);
-        }
-      }
+            // Créer un nouveau conteneur pour la nouvelle question
+            var newQuestionContainer = $("<div>").attr("id", "question-container-" + questionCount);
 
-      let inputCounter = 3; // Commencez à partir de 3 pour correspondre aux champs d'entrée existants
+            // Ajouter les champs de texte pour la nouvelle question
+            newQuestionContainer.append("<h2>السؤال " + questionCount + "</h2>");
+            newQuestionContainer.append('<textarea class="textarea-field" name="question_text[' + (questionCount - 1) + ']" placeholder="نص السؤال"></textarea>');
+            
+            const questionPhoto = document.createElement('file');
+            questionPhoto.name = 'question_img[]';
+            questionPhoto.placeholder = 'صورة';
+            newQuestionContainer.append("<h2>الاختيارات</h2>");
 
-      function ajouterChampInput() {
-        const nouvelInputContainer = document.createElement('div');
-        nouvelInputContainer.classList.add('input-container');
+            // Ajouter les champs de texte pour les réponses
+            for (var i = 0; i < 3; i++) {
+                var responseContainer = $('<div class="response-container">');
+                responseContainer.append('<label class="radio-container">');
+                responseContainer.append('<input type="radio" name="is_correct[' + (questionCount - 1) + '][]" value="' + i + '">');
+                responseContainer.append('<span class="checkmark"></span>');
+                responseContainer.append('</label>');
+                responseContainer.append('<input type="text" class="input-field" name="choice_text[' + (questionCount - 1) + '][]" placeholder="اختيار">');
+                newQuestionContainer.append(responseContainer);
+            }
 
-        const nouvelCheckboxContainer = document.createElement('label');
-        nouvelCheckboxContainer.classList.add('checkbox-container');
+            // Bouton "Supprimer question" pour supprimer la question entière
+            newQuestionContainer.append('<button type="button" class="supprimer-question">حذف سؤال </button>');
 
-        const nouvelCheckbox = document.createElement('input');
-        nouvelCheckbox.type = 'checkbox';
+            // Ajouter le nouveau bouton "Ajouter question" à la fin de la nouvelle question
+            newQuestionContainer.append('<button type="button" class="ajouter-question">اضافة سؤال</button>');
 
-        const nouvelCheckmark = document.createElement('span');
-        nouvelCheckmark.classList.add('checkmark');
-
-        nouvelCheckboxContainer.appendChild(nouvelCheckbox);
-        nouvelCheckboxContainer.appendChild(nouvelCheckmark);
-
-        const nouvelInput = document.createElement('input');
-        nouvelInput.type = 'text';
-        nouvelInput.classList.add('input-field');
-        nouvelInput.placeholder = 'اختيار ';
-
-        const deleteButton = document.createElement('button');
-        deleteButton.innerHTML = '&#10005;';
-        deleteButton.classList.add('delete-choice-btn');
-        deleteButton.addEventListener('click', function() {
-          supprimerChampInput(this);
+            // Insérer la nouvelle question après la question actuelle
+            $("#" + currentQuestionContainerId).after(newQuestionContainer);
         });
 
-        nouvelInputContainer.appendChild(nouvelCheckboxContainer);
-        nouvelInputContainer.appendChild(nouvelInput);
-        nouvelInputContainer.appendChild(deleteButton);
+        // Lorsque le bouton "Supprimer réponse" est cliqué
+        $(document).on("click", ".supprimer-reponse", function() {
+            // Récupérer le conteneur de la réponse à supprimer
+            var reponseContainer = $(this).parent();
 
-        const questionContainer = document.getElementById('question-container');
-        questionContainer.insertBefore(nouvelInputContainer, questionContainer.lastElementChild);
+            // Vérifier s'il y a plus d'une réponse dans la question
+            if (reponseContainer.siblings(".response-container").length > 0) {
+                // Supprimer l'input de la réponse correspondante
+                reponseContainer.find("input[type='text']").remove();
+                // Supprimer le radio et le bouton "Supprimer réponse" correspondants
+                reponseContainer.find("input[type='radio']").remove();
+                reponseContainer.find(".supprimer-reponse").remove();
+            } else {
+                alert("لا يمكنك حذف جميع الردود. يجب أن يكون هناك إجابة واحدة على الأقل لكل سؤال..");
+            }
+        });
 
-        inputCounter++;
-      }
+        // Lorsque le bouton "Supprimer question" est cliqué
+        $(document).on("click", ".supprimer-question", function() {
+            // Récupérer le conteneur de la question à supprimer
+            var questionContainer = $(this).parent();
 
-      function supprimerChampInput(button) {
-        const inputContainer = button.parentNode;
-        inputContainer.remove();
-      }
-
-      let numeroQuestion = 2; // Variable pour suivre le numéro de la question
-
-      function ajouterQuestion() {
-        const nouvelleQuestionHTML = `
-    <h2>السؤال ${numeroQuestion}</h2>
-    <textarea class="textarea-field" placeholder="نص السؤال"></textarea>
-    <h2>الاختيارات </h2>
-    <div class="input-container">
-      <label class="checkbox-container">
-        <input type="checkbox">
-        <span class="checkmark"></span>
-      </label>
-      <input type="text" class="input-field" placeholder="اختيار  ">
-      <button onclick="supprimerChampInput(this)" class="delete-choice-btn">&#10005;</button>
-    </div>
-    <div class="input-container">
-      <label class="checkbox-container">
-        <input type="checkbox">
-        <span class="checkmark"></span>
-      </label>
-      <input type="text" class="input-field" placeholder="اختيار  ">
-      <button onclick="supprimerChampInput(this)" class="delete-choice-btn">&#10005;</button>
-    </div>
-  `;
-
-        $('#question-container').append(nouvelleQuestionHTML);
-        numeroQuestion++; // Incrémenter le numéro de la question pour la prochaine fois
-      }
-    </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="js/script.js"></script>
-    <script>
-      $(document).ready(function() {
-          let questionCounter = 2;
-
-          // Ajouter un champ de réponse
-          function ajouterChampInput(container) {
-              const nouvelInputContainer = document.createElement('div');
-              nouvelInputContainer.classList.add('input-container');
-
-              const nouvelCheckboxContainer = document.createElement('label');
-              nouvelCheckboxContainer.classList.add('checkbox-container');
-
-              const nouvelCheckbox = document.createElement('input');
-              nouvelCheckbox.type = 'checkbox';
-
-              const nouvelCheckmark = document.createElement('span');
-              nouvelCheckmark.classList.add('checkmark');
-
-              nouvelCheckboxContainer.appendChild(nouvelCheckbox);
-              nouvelCheckboxContainer.appendChild(nouvelCheckmark);
-
-              const nouvelInput = document.createElement('input');
-              nouvelInput.type = 'text';
-              nouvelInput.classList.add('input-field');
-              nouvelInput.placeholder = 'اختيار ';
-              nouvelInput.name = `choice_text[${container - 1}][]`;
+            // Supprimer la question entière
+            questionContainer.remove();
+        });
 
 
-              const deleteButton = document.createElement('button');
-              deleteButton.innerHTML = '&#10005;';
-              deleteButton.classList.add('delete-choice-btn');
-              deleteButton.addEventListener('click', function() {
-                  supprimerChampInput(this);
-              });
+        function insertSymbol(symbol) {
+            var textarea = $("#question-container-" + questionCount).find("textarea");
+            var currentCursorPosition = textarea.prop("selectionStart");
+            var currentValue = textarea.val();
+            var newValue =
+                currentValue.substring(0, currentCursorPosition) +
+                symbol +
+                currentValue.substring(currentCursorPosition);
+            textarea.val(newValue);
+        }
 
-              nouvelInputContainer.appendChild(nouvelCheckboxContainer);
-              nouvelInputContainer.appendChild(nouvelInput);
-              nouvelInputContainer.appendChild(deleteButton);
+        // Event handler for the "Insert math symbol" button
+        $(".insert-math-symbol").on("click", function () {
+            $(".keyboard").toggle(); // Toggle the visibility of the math keyboard
+        });
 
-              const questionContainer = document.getElementById(`question-container-${container}`);
-              questionContainer.insertBefore(nouvelInputContainer, questionContainer.lastElementChild);
-          }
+        // Event handler for the math keyboard buttons
+        $(".keyboard button").on("click", function () {
+            var symbol = $(this).text();
+            insertSymbol(symbol);
+        });
 
-          // Supprimer un champ de réponse
-          function supprimerChampInput(button) {
-              const inputContainer = button.parentNode;
-              inputContainer.remove();
-          }
-
-         // Ajouter une question
-function ajouterQuestion() {
-const questionContainer = document.createElement('div');
-questionContainer.id = `question-container-${questionCounter}`;
-
-const questionTitle = document.createElement('h2');
-questionTitle.innerText = `السؤال ${questionCounter}`;
-
-const questionTextarea = document.createElement('textarea');
-questionTextarea.classList.add('textarea-field');
-questionTextarea.name = 'question_text[]';
-questionTextarea.placeholder = 'نص السؤال';
-
-const questionPhoto = document.createElement('file');
-questionPhoto.name = 'question_img[]';
-questionPhoto.placeholder = 'صورة';
-
-const choicesTitle = document.createElement('h2');
-choicesTitle.innerText = 'الاختيارات';
-
-const firstChoiceContainer = document.createElement('div');
-firstChoiceContainer.classList.add('input-container');
-
-const firstChoiceCheckboxContainer = document.createElement('label');
-firstChoiceCheckboxContainer.classList.add('checkbox-container');
-
-const firstChoiceCheckbox = document.createElement('input');
-firstChoiceCheckbox.type = 'checkbox';
-firstChoiceCheckbox.name = `is_correct[${questionCounter - 1}][]`;
-firstChoiceCheckbox.value = '1';
-
-const firstChoiceCheckmark = document.createElement('span');
-firstChoiceCheckmark.classList.add('checkmark');
-
-firstChoiceCheckboxContainer.appendChild(firstChoiceCheckbox);
-firstChoiceCheckboxContainer.appendChild(firstChoiceCheckmark);
-
-const firstChoiceInput = document.createElement('input');
-firstChoiceInput.type = 'text';
-firstChoiceInput.classList.add('input-field');
-firstChoiceInput.placeholder = 'اختيار ';
-firstChoiceInput.name = `choice_text[${questionCounter - 1}][]`;
-
-const firstChoiceDeleteButton = document.createElement('button');
-firstChoiceDeleteButton.innerHTML = '&#10005;';
-firstChoiceDeleteButton.classList.add('delete-choice-btn');
-firstChoiceDeleteButton.addEventListener('click', function () {
-  supprimerChampInput(this);
-});
-
-firstChoiceContainer.appendChild(firstChoiceCheckboxContainer);
-firstChoiceContainer.appendChild(firstChoiceInput);
-firstChoiceContainer.appendChild(firstChoiceDeleteButton);
-
-const questionAddChoiceButton = document.createElement('button');
-questionAddChoiceButton.type = 'button';
-questionAddChoiceButton.classList.add('add-choice-btn');
-questionAddChoiceButton.dataset.container = questionCounter;
-questionAddChoiceButton.innerText = 'Ajouter une réponse';
-questionAddChoiceButton.addEventListener('click', function () {
-  ajouterChampInput(this.dataset.container);
-});
-
-questionContainer.appendChild(questionTitle);
-questionContainer.appendChild(questionTextarea);
-questionContainer.appendChild(questionPhoto);
-questionContainer.appendChild(choicesTitle);
-questionContainer.appendChild(firstChoiceContainer);
-questionContainer.appendChild(questionAddChoiceButton);
-
-const mainContainer = document.getElementById('main-container');
-mainContainer.appendChild(questionContainer);
-
-questionCounter++;
-}
-
-          // Gérer l'événement de clic sur le bouton d'ajout de réponse
-          $(document).on('click', '.add-choice-btn', function() {
-              const container = $(this).data('container');
-              ajouterChampInput(container);
-          });
-
-          // Gérer l'événement de clic sur le bouton d'ajout de question
-          $('#add-question-btn').click(function() {
-              ajouterQuestion();
-          });
-      });
-  </script>
+        // ... (Other event handlers for adding/removing questions, responses, etc.) ...
+    });
+  
+</script>
 </body>
-
 </html>
-

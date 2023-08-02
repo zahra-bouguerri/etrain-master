@@ -1,162 +1,256 @@
-<?php include "./config/connexion.php";
-include "./includes/header.php";?>
+<?php
+include "./config/connexion.php";
+include "./includes/header.php";
 
-    <!-- breadcrumb start-->
-    <!-- ================ contact section start ================= -->
+// Check if the user is logged in.
+if (!isset($_SESSION['loggedIn']) || !$_SESSION['loggedIn']) {
+    // Redirect the user to the login page or show an appropriate message.
+    echo "<script>alert('Veuillez vous connecter pour accéder au quiz.');</script>";
+    exit;
+}
 
-    <section class="blog_area single-post-area section_padding">
-        <div class="container">
-            <div class="row">
-             <form id="quizForm" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-    <input type="hidden" name="selected_quiz_id" id="selected_quiz_id" value="<?php echo $quiz_id; ?>">                 
-<?php 
-// Check if the quiz ID is present in the URL
 if (isset($_GET['quiz'])) {
     $quizId = $_GET['quiz'];
-    $userId = $_GET['user'];
-} else {
-    // If quiz ID is not present in the URL, you can set a default value or handle the error
-    $quizId = 0; // For example, setting it to 0 as a default value
-}
-// Récupérer les questions
-$questions = array();
-$sql_questions = "SELECT * FROM question WHERE quiz_id = $quizId";
-$result_questions = $conn->query($sql_questions);
-if ($result_questions->num_rows > 0) {
-    while ($row = $result_questions->fetch_assoc()) {
-        $questions[] = $row;
+    
+    // Assurez-vous que l'utilisateur est connecté avant d'accéder à la variable $_SESSION['user_id']
+    if (isset($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id'];
+    } elseif (isset($_GET['user'])) {
+        $userId = $_GET['user'];
+    } else {
+        // Si l'utilisateur n'est pas connecté et le paramètre "user" n'est pas présent dans l'URL, affichez un message ou redirigez-le vers une page de connexion.
+        echo "Veuillez vous connecter pour accéder au quiz.";
+        exit;
     }
-}
 
-// Récupérer les réponses pour chaque question
-$responses = array();
-foreach ($questions as $question) {
-    $question_id = $question['question_id'];
-    $sql_responses = "SELECT * FROM response WHERE question_id = $question_id";
-    $result_responses = $conn->query($sql_responses);
-    if ($result_responses->num_rows > 0) {
-        while ($row = $result_responses->fetch_assoc()) {
-            $responses[$question_id][] = $row;
+    $questions = array();
+    $responses = array();
+
+    $sql_questions = "SELECT * FROM question WHERE quiz_id = $quizId";
+    $result_questions = $conn->query($sql_questions);
+
+    if ($result_questions->num_rows > 0) {
+        while ($row = $result_questions->fetch_assoc()) {
+            $questions[] = $row;
         }
     }
-}
 
-// Récupérer les informations du quiz
-$quiz_info = array();
-$sql_quiz_info = "SELECT * FROM quiz WHERE quiz_id = $quizId";
-$result_quiz_info = $conn->query($sql_quiz_info);
-if ($result_quiz_info->num_rows > 0) {
-    $quiz_info = $result_quiz_info->fetch_assoc();
-}
-
-// Vérifier si le formulaire a été soumis
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Récupérer le nom du test soumis par le formulaire
-    $quiz_name = $_POST["quiz_name"];
-
-    // Insérer le nom du test dans la base de données
-    $sql_update_quiz_name = "UPDATE quiz SET quiz_name = '$quiz_name' WHERE quiz_id = $quizId";
-    if ($conn->query($sql_update_quiz_name) === TRUE) {
-        // Le nom du test a été inséré avec succès
-    } else {
-        echo "Erreur lors de l'insertion du nom du test dans la base de données: " . $conn->error;
-    }
-}
-
-if (isset($_POST['submit_quiz'])) {
-    // Le formulaire a été soumis et le bouton "السؤال القادم" a été cliqué
-
-    // Récupérer les réponses soumises par l'utilisateur
     foreach ($questions as $question) {
         $question_id = $question['question_id'];
-        if (isset($_POST["reponse_$question_id"])) {
-            // L'utilisateur a coché des réponses pour cette question
-            $submitted_responses = $_POST["reponse_$question_id"];
-            // Traitez les réponses soumises par l'utilisateur ici
-            // ...
+
+        $sql_responses = "SELECT * FROM response WHERE question_id = $question_id";
+        $result_responses = $conn->query($sql_responses);
+
+        if ($result_responses->num_rows > 0) {
+            while ($row = $result_responses->fetch_assoc()) {
+                $responses[$question_id][] = $row;
+            }
         }
     }
-    $submitted_quiz_id = $_POST['selected_quiz_id'];
 }
 ?>
-                </div>
-                
-                    <div class="single-post justify-content-center ">
-                        <div class="blog_details">
-                        
-                        <?php foreach ($questions as $index => $question) : ?>
-    <!-- Display each question and its responses -->
-    <?php $question_id = $question['question_id']; ?>
-    <div class="single-post justify-content-center">
-        <div class="blog_details">
-            <form method="post">
-            <p class="excert text-right"><?php echo 'السؤال ' . ($index + 1) . ' من ' . count($questions); ?></p>
-            <div class="quote-wrapper">
-            <div  class="quotes text-start">
-            <div class="text-right">
-                <h5><?php echo $question['question_text']; ?></h5>
-                <?php if ($question['question_img'] !== '') :
-                    $imagePath = "../HTMLversion2/" . $question['question_img'];
-                    // Display the question image if available
-                    echo '<div style="text-align: center;">';
-                    echo '<img src="' . $imagePath . '" alt="Question Image">';
-                    echo '</div>';
-                endif; ?>
-                <?php foreach ($responses[$question_id] as $response) : ?>
+
+
+<section class="blog_area single-post-area section_padding">
+    <div class="container">
+        <?php if (isset($questions) && isset($userId)) : ?>
+        <form id="quizForm" method="post" action="<?php echo $_SERVER['PHP_SELF'] . '?quiz=' . $quizId . '&user=' . $userId; ?>">
+            <input type="hidden" name="selected_quiz_id" id="selected_quiz_id" value="<?php echo $quizId; ?>">
+            <input type="hidden" name="total_correct_responses" id="total_correct_responses" value="0">
+            <?php foreach ($questions as $index => $question) :
+                $question_id = $question['question_id'];
+                $userSelectedResponse = false;
+                $submitted_response = null;
+                if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["reponse_$question_id"])) {
+                    $submitted_response = $_POST["reponse_$question_id"];
+                    if (!empty($submitted_response)) {
+                        $userSelectedResponse = true;
+                    }
+                }
+            ?>
+            <div class="single-post justify-content-center" <?php echo ($index > 0 ? 'style="display: none;"' : ''); ?>>
+                <div class="blog_details">
                     <div>
-                        <input type="checkbox" name="reponse_<?php echo $question_id; ?>[]" value="<?php echo $response['response_id']; ?>">
-                        <label><?php echo $response['response_text']; ?></label>
-                        <br>
-                    </div>
-                <?php endforeach; ?>
-                </div>
-                </div>
-                <!-- Add the "Submit" button for each question -->
-                <div class="detials">
-                    <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit" name="submit_quiz">السؤال القادم</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Add a hidden input field to store the current question number -->
-    <input type="hidden" name="question_number" value="<?php echo $questionNumber; ?>">
-<?php endforeach; ?>
-                                        </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
-                    </div>
-                    <div class="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
-                    <div class="detials">
-    <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit" name="submit_quiz">السؤال القادم</button>
-</div>
-                    </div>
-                </form>
-                </div>
-            </div>
-         
-            <!--vidio div-->
-
-            <div class="col-lg-8 vidio-list" style="display: none;">
-                <div class="single-post ">
-                    <div class="blog_details">
-                        <h2>vidio</h2>
-                        <p class="excert"></p>
-                        <div class="quote-wrapper ">
-                            <p class="text-center">السؤال </p>
+                        <p class="excert text-right"><?php echo 'السؤال ' . ($index + 1) . ' من ' . count($questions); ?></p>
+                        <div class="quote-wrapper">
                             <div class="quotes text-start">
-                                هل تحب زهرة
+                                <div class="text-right">
+                                    <h5><?php echo $question['question_text']; ?></h5>
+                                    <?php if ($question['question_img'] !== '') :
+                                        $imagePath = "../HTMLversion2/" . $question['question_img'];
+                                        echo '<div style="text-align: center;">';
+                                        echo '<img src="' . $imagePath . '" alt="Question Image">';
+                                        echo '</div>';
+                                    endif; ?>
+                                    <?php foreach ($responses[$question_id] as $response) : ?>
+                                        <div>
+    <input type="radio" name="reponse_<?php echo $question_id; ?>" id="reponse_<?php echo $question_id; ?>_<?php echo $response['response_id']; ?>" value="<?php echo $response['response_id']; ?>" <?php echo ($userSelectedResponse ? 'disabled' : ''); ?> <?php echo ($submitted_response == $response['response_id'] ? 'checked' : ''); ?> required>
+    <label for="reponse_<?php echo $question_id; ?>_<?php echo $response['response_id']; ?>" style=""><?php echo $response['response_text']; ?></label>
+    <br>
+</div>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
+                            <div class="display">
+                            <button class="button rounded-0 primary-bg text-white w-100 btn_1 show-correction-btn" data-question-id="<?php echo $question_id; ?>" type="button" onclick="showNextQuestionButton()">Afficher les réponses</button>
+                            <?php if (!$userSelectedResponse && $index < count($questions) - 1) : ?>
+                                <div id="next-question-container" style="display: none;">
+            <!-- The "Prochaine question" button will be displayed here -->
+            <button class="button rounded-0 primary-bg text-white w-100 btn_1 next-question-btn" data-question-number="<?php echo $index; ?>" type="button">Prochaine question</button>
+        </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
-                                        </form>
                 </div>
             </div>
-
-        </div>
+            <?php endforeach; ?>
+            <div class="detials">
+                <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit" name="submit_quiz">
+                    Soumettre le quiz
+                </button>
+            </div>
+        </form>
+        <?php endif; ?>
     </div>
+</section>
 
-<?php include "./includes/footer.php"?>
+
+<script>
+    
+    const submitButton = document.querySelector('button[name="submit_quiz"]');
+    const questions = document.querySelectorAll('.single-post.justify-content-center');
+    let currentQuestionNumber = 0;
+
+    submitButton.style.display = 'none';
+
+    submitButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        const totalCorrectResponsesField = document.getElementById('total_correct_responses');
+        totalCorrectResponsesField.value = totalCorrectResponses;
+
+        // Calculer le pourcentage de réponses correctes
+        const percentageCorrect = (totalCorrectResponses / questions.length) * 100;
+
+        // Afficher le pourcentage dans l'alerte
+        alert(`Bravo ! Vous avez répondu correctement à ${percentageCorrect.toFixed(2)}% des questions.`);
+
+        // Récupérer le quizId et le pourcentage de réponses correctes
+        const quizId = document.getElementById('selected_quiz_id').value;
+        const userId = <?php echo isset($userId) ? $userId : 'null'; ?>; // Récupérer l'ID de l'utilisateur depuis la variable PHP $userId
+
+        // Enregistrer les résultats du quiz dans la base de données via une requête AJAX
+        const formData = new FormData();
+        formData.append('quizId', quizId);
+        formData.append('percentageCorrect', percentageCorrect.toFixed(2));
+        formData.append('userId', userId); // Ajouter l'ID de l'utilisateur à la requête
+
+        fetch('save_grade.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Résultats du quiz enregistrés avec succès dans la base de données.');
+                document.getElementById('quizForm').submit(); // Soumettre le formulaire après l'enregistrement réussi
+            } else {
+                console.error('Échec de l\'enregistrement des résultats du quiz dans la base de données.');
+            }
+        })
+        .catch(error => {
+            console.error('Une erreur s\'est produite lors de l\'enregistrement des résultats du quiz dans la base de données :', error);
+        });
+    });
+
+
+    const nextQuestionButtons = document.querySelectorAll('.next-question-btn');
+    nextQuestionButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const nextQuestionNumber = currentQuestionNumber + 1;
+            questions[currentQuestionNumber].style.display = 'none';
+            if (nextQuestionNumber < questions.length) {
+                questions[nextQuestionNumber].style.display = 'block';
+                currentQuestionNumber = nextQuestionNumber;
+            } else {
+                document.getElementById('quizForm').submit();
+            }
+        });
+    });
+
+    let totalCorrectResponses = 0;
+
+    const showCorrectionButtons = document.querySelectorAll('.show-correction-btn');
+    showCorrectionButtons.forEach(button => {
+    button.addEventListener('click', async function () {
+            const questionId = button.getAttribute('data-question-id');
+            const responses = document.querySelectorAll(`input[name="reponse_${questionId}"]`);
+            let isAnyResponseCorrect = false;
+            let isAnyResponseIncorrect = false;
+
+            for (const response of responses) {
+                const responseId = response.value;
+                const responseLabel = document.querySelector(`label[for="reponse_${questionId}_${responseId}"]`);
+
+                try {
+                    const isCorrect = await getResponseStateFromDatabase(questionId, responseId);
+
+                    if (isCorrect === 1) {
+                        responseLabel.style.color = 'green';
+                        if (response.checked) {
+                            isAnyResponseCorrect = true;
+                        }
+                    } else {
+                        responseLabel.style.color = 'red';
+                        if (response.checked) {
+                            isAnyResponseIncorrect = true;
+                        }
+                    }
+
+                    response.disabled = true;
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            button.disabled = true;
+
+            if (isAnyResponseIncorrect) {
+                alert("À refaire. Veuillez réviser vos réponses et essayer à nouveau.");
+            } else {
+                alert("Bravo ! Vous avez répondu correctement.");
+                totalCorrectResponses++;
+            }
+            if (currentQuestionNumber === questions.length - 1) {
+            submitButton.style.display = 'block'; // Affiche le bouton "Soumettre le quiz" après avoir affiché la dernière réponse
+        }
+        });
+    });
+
+    function getResponseStateFromDatabase(questionId, responseId) {
+        return new Promise(function (resolve, reject) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'get_response_state.php', true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const isCorrect = parseInt(xhr.responseText);
+                    resolve(isCorrect);
+                } else {
+                    reject(xhr.statusText);
+                }
+            };
+            xhr.onerror = function () {
+                reject(xhr.statusText);
+            };
+            xhr.send(`question_id=${questionId}&response_id=${responseId}`);
+        });
+    }
+    function showNextQuestionButton() {
+        // Get the "Prochaine question" button container
+        const nextQuestionContainer = document.getElementById('next-question-container');
+        
+        // Show the "Prochaine question" button container
+        nextQuestionContainer.style.display = 'block';
+    }
+</script>

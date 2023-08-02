@@ -27,10 +27,10 @@ if (isset($_POST['submit'])) {
             exit(); 
        
         } else {
-            $password_error = "le mot de passe est incorrect"; 
+            $password_error = "كلمة المرور غير صحيحة."; 
         }
 }else {
-    $email_error = "Email ou role est incorrect";
+    $email_error = "البريد الإلكتروني أو الدور غير صحيح.";
 
 }
 }

@@ -1438,7 +1438,16 @@ ul {
   font-size: 16px;
   cursor: pointer;
 }
-
+.cc{
+  color:black;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+.cc:hover{
+  background-color: rgb(200, 26, 188);
+}
 .delete-choice-btn:hover {
   color: #ff6699;
 }

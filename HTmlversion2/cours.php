@@ -15,14 +15,14 @@ if (isset($_POST['Ajouter']) && isset($_POST['cours'])) {
         }
         $target_file = $target_dir . basename($_FILES["pdf"]["name"]);
         if (move_uploaded_file($_FILES["pdf"]["tmp_name"], $target_file)) {
-            echo "<script>alert('PDF added successfully');</script>";
+            echo "<script>alert('تمت اضافة الملف بنجاح');</script>";
 
             // Update the PDF file path in the database
             $sql = "UPDATE cours SET pdf_name = ? WHERE course_id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param('si', $target_file, $selected_course);
             if ($stmt->execute()) {
-                echo "<script>alert('Data updated successfully');</script>";
+              
             } else {
                 echo "<script>alert('Error updating data');</script>";
             }
@@ -39,14 +39,14 @@ if (isset($_POST['Ajouter']) && isset($_POST['cours'])) {
         }
         $target_video = $target_dir . basename($_FILES["vidio"]["name"]);
         if (move_uploaded_file($_FILES["vidio"]["tmp_name"], $target_video)) {
-            echo "<script>alert('Video added successfully');</script>";
+            echo "<script>alert('تمت اضافة الفيديو بنجاح');</script>";
 
             // Update the video file path in the database
             $sql = "UPDATE cours SET video_name = ? WHERE course_id = ?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param('si', $target_video, $selected_course);
             if ($stmt->execute()) {
-                echo "<script>alert('Data updated successfully');</script>";
+           
             } else {
                 echo "<script>alert('Error updating data');</script>";
             }
