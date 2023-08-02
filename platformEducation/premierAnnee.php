@@ -93,7 +93,8 @@ include "./includes/header.php";?>
                                     echo "<li class='has-dropdown'>
                                     <a class='d-flex courseItem' id='cours_$courseId'>
                                         <p class='titre3'>" . $courseName . " <i class='fas fa-chevron-down'></i></p>
-                                    </a>
+                                        <span class='etat-chapitre text-left'><b>".$etat."</b></span>
+                                        </a>
                                     <ul class='list cat-list quizzes' id='quizzes_$courseId'>";
                                                               // Fetch the first quiz for each course
         $fetchQuizQuery = "SELECT quiz_id, quiz_name FROM quiz WHERE course_id = $courseId LIMIT 1";

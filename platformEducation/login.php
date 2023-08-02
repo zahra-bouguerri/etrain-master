@@ -17,7 +17,7 @@ if (isset($_POST['login'])) {
         $row = $result->fetch_assoc();
 
         if (password_verify($motPass, $row['motPass'])) {
-            $success = 'Login successful';
+            $success = 'تم تسجيل الدخول بنجاح!';
 
             // Check if user is already logged in
             if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {

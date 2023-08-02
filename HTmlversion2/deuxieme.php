@@ -1,3 +1,4 @@
+
 <?php
 include "./includes/header.php";
 include "./includes/topmenu.php";
@@ -348,7 +349,7 @@ if (isset($_POST['deletesub'])) {
       $checkLinkedQuery = "SELECT * FROM cours  WHERE subchapter_id = '$subchapterId' LIMIT 1";
       $linkedResult = $conn->query($checkLinkedQuery);
       if ($linkedResult->num_rows > 0) {
-        $linkedRecords[] = $suchapterId;
+        $linkedRecords[] = $subchapterId;
       }
       // Vérifiez également les autres tables liées ici et ajoutez les ID de cours liés à $linkedRecords si nécessaire
     }
@@ -494,8 +495,15 @@ if (isset($_POST['supprimerLecon'])) {
                 </select>
                   
                   <label for="unitName">  الوحدة التعليمية  الجديدة </label>
-                  <input type="text" id="unitName" name="unitName" required>
+                  <input type="text" id="unitName" name="unitName" >
+                  <label for="cours"> حالة  </label>
+                <select name="etat" class="niveau" >
+                  <option value=""> --اختر--</option>
+                  <option value=""> <option>
+                 <option value=" جديد"> جديد</option>
+                </select>
                   <button type="submit" name ="modifiersequence">تعديل</button>
+                 
                 </form>
               </div>
             </div>
@@ -507,51 +515,54 @@ if (isset($_POST['modifiersequence'])) {
     $branchId = $_POST['branch2'];
     $chapterId = $_POST['chapter'];
     $newSubchapterName = $_POST['unitName'];
+    $newEtat = $_POST['etat'];
 
     // Vérifier si la sous-unité existe déjà dans la base de données pour cette branche et ce chapitre
-    $checkQuery = "SELECT * FROM chapitre WHERE chapter_name = '$newSubchapterName' AND chapter_id = '$branchId'";
+    $checkQuery = "SELECT * FROM chapitre WHERE chapter_name = '$newSubchapterName'  AND chapter_id = '$branchId'";
     $checkResult = $conn->query($checkQuery);
 
     if ($checkResult->num_rows > 0) {
         echo "<script>alert('هذه الوحدة التعليمية موجودة بالفعل في الشعبة والوحدة التعلمية المحددة.');</script>";
-    } else {
-        // Mettre à jour la sous-unité (وحدة جزئية) dans la base de données
-        $updateQuery = "UPDATE chapitre SET chapter_name = '$newSubchapterName' WHERE chapter_id = '$chapterId'";
+      } else {
+        // Construire la requête de mise à jour pour inclure uniquement les champs modifiés
+        $updateQuery = "UPDATE chapitre SET";
+
+        // Si un nouveau nom de sous-unité a été fourni, inclure le champ name dans la requête de mise à jour
+        if (!empty($newSubchapterName)) {
+            $updateQuery .= " chapter_name = '$newSubchapterName',";
+        }
+
+        // Vérifier si un nouvel état a été fourni ou si l'option "vide" a été sélectionnée
+        if ($newEtat !== 'vide') {
+            // Inclure le champ etat dans la requête de mise à jour
+            $updateQuery .= " etat = '$newEtat',";
+        } else {
+            // Sinon, mettre le champ etat à une valeur vide ou null dans la base de données (selon le schéma de la base de données)
+            $updateQuery .= " etat = '',"; // or $updateQuery .= " etat = NULL,"; if your schema allows NULL values
+        }
+
+        // Supprimer la dernière virgule dans la requête de mise à jour
+        $updateQuery = rtrim($updateQuery, ',');
+
+        // Ajouter la condition WHERE pour mettre à jour uniquement le chapitre spécifié
+        $updateQuery .= " WHERE chapter_id = '$chapterId'";
+
+        // Exécuter la requête de mise à jour
         if ($conn->query($updateQuery) === TRUE) {
             echo "<script>alert('تم تعديل الوحدة الجزئية بنجاح.');</script>";
-        } else {
+            header("Location: index.php"); // Redirect to index.php after successful update
+            exit(); 
+          } else {
             echo "Erreur : " . $conn->error;
         }
     }
-  }
-   
+}
 
 ?>
 
 
 
-
-
-
-
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-            
-           
-
-            <div id="EditPartModal" class="modal">
+   <div id="EditPartModal" class="modal">
               <div class="modal-content">
                 <span class="close" onclick="closeEditPartModal()">&times;</span>
                 <h2> تعديل وحدة جزئية</h2>
@@ -587,7 +598,8 @@ if (isset($_POST['modifiersequence'])) {
                 
                   </select>
                   <label for="unitName">  الوحدة الجزيئية  الجديدة </label>
-                  <input type="text" id="unitName" name="unitName" required>
+                  <input type="text" id="unitName" name="unitName" >
+                 
                   <button type="submit" name ="modifierSequence">تعديل</button>
                 </form>
               </div>
@@ -601,6 +613,7 @@ if (isset($_POST['modifierSequence'])) {
     $chapterId = $_POST['chapter'];
     $subchapterId = $_POST['subchapter'];
     $newSubchapterName = $_POST['unitName'];
+  
 
     // Vérifier si la sous-unité existe déjà dans la base de données pour cette branche et ce chapitre
     $checkQuery = "SELECT * FROM sous_chapitre WHERE subchapter_name = '$newSubchapterName' AND chapter_id = '$chapterId'";
@@ -609,15 +622,32 @@ if (isset($_POST['modifierSequence'])) {
     if ($checkResult->num_rows > 0) {
         echo "<script>alert('هذه الوحدة الجزئية موجودة بالفعل في الشعبة والوحدة التعلمية المحددة.');</script>";
     } else {
-        // Mettre à jour la sous-unité (وحدة جزئية) dans la base de données
-        $updateQuery = "UPDATE sous_chapitre SET subchapter_name = '$newSubchapterName' WHERE subchapter_id = '$subchapterId'";
+        // Construire la requête de mise à jour pour inclure uniquement les champs modifiés
+        $updateQuery = "UPDATE sous_chapitre SET";
+
+        // Si un nouveau nom de sous-unité a été fourni, inclure le champ subchapter_name dans la requête de mise à jour
+        if (!empty($newSubchapterName)) {
+            $updateQuery .= " subchapter_name = '$newSubchapterName',";
+        }
+
+      
+
+        // Supprimer la dernière virgule dans la requête de mise à jour
+        $updateQuery = rtrim($updateQuery, ',');
+
+        // Ajouter la condition WHERE pour mettre à jour uniquement le sous-chapitre spécifié
+        $updateQuery .= " WHERE subchapter_id = '$subchapterId'";
+
+        // Exécuter la requête de mise à jour
         if ($conn->query($updateQuery) === TRUE) {
             echo "<script>alert('تم تعديل الوحدة الجزئية بنجاح.');</script>";
-        } else {
+            header("Location: index.php"); // Redirect to index.php after successful update
+            exit(); 
+          } else {
             echo "Erreur : " . $conn->error;
         }
     }
-  }
+}
        
       
 ?>
@@ -675,7 +705,13 @@ if (isset($_POST['modifierSequence'])) {
                   <option value="" disabled selected>اختر درس</option>
                </select>
                   <label > عنوان الدرس  الجديد</label>
-                  <input type="text" id="unitName" name="unitName" required>
+                  <input type="text" id="unitName" name="unitName" >
+                  <label for="cours"> حالة  </label>
+                <select name="etat" class="niveau" >
+                  <option value=""> --اختر--</option>
+                  <option value=""> <option>
+                 <option value=" جديد"> جديد</option>
+                </select>
                   <button type="submit" name="modifiercour">تعديل</button>
                 </form>
               </div>
@@ -689,21 +725,46 @@ if (isset($_POST['modifierSequence'])) {
 if (isset($_POST['modifiercour'])) {
   $selectedCoursId = $_POST['cours'];
   $newCoursTitle = $_POST['unitName'];
+  $newEtat = $_POST['etat'];
 
   // Vérifier si le titre du cours existe déjà pour un autre cours
   $checkQuery = "SELECT * FROM cours WHERE course_name = '$newCoursTitle' AND course_id != '$selectedCoursId'";
   $checkResult = $conn->query($checkQuery);
 
   if ($checkResult->num_rows > 0) {
-    echo "<script>alert('عفوًا ، يوجد بالفعل درس آخر بنفس العنوان. الرجاء اختيار عنوان جديد.');</script>";
+      echo "<script>alert('عفوًا ، يوجد بالفعل درس آخر بنفس العنوان. الرجاء اختيار عنوان جديد.');</script>";
   } else {
-    // Mettre à jour le titre du cours dans la base de données
-    $updateQuery = "UPDATE cours SET course_name = '$newCoursTitle' WHERE course_id = '$selectedCoursId'";
-    if ($conn->query($updateQuery) === TRUE) {
-      echo "<script>alert('تم تعديل عنوان الدرس بنجاح.');</script>";
+      // Construire la requête de mise à jour pour inclure uniquement les champs modifiés
+      $updateQuery = "UPDATE cours SET";
+
+      // Si un nouveau titre de cours a été fourni, inclure le champ course_name dans la requête de mise à jour
+      if (!empty($newCoursTitle)) {
+          $updateQuery .= " course_name = '$newCoursTitle',";
+      }
+
+      // Vérifier si un nouvel état a été fourni ou si l'option "vide" a été sélectionnée
+      if ($newEtat !== 'vide') {
+        // Inclure le champ etat dans la requête de mise à jour
+        $updateQuery .= " etat = '$newEtat',";
     } else {
-      echo "Erreur : " . $conn->error;
+        // Sinon, mettre le champ etat à une valeur vide ou null dans la base de données (selon le schéma de la base de données)
+        $updateQuery .= " etat = '',"; // or $updateQuery .= " etat = NULL,"; if your schema allows NULL values
     }
+
+      // Supprimer la dernière virgule dans la requête de mise à jour
+      $updateQuery = rtrim($updateQuery, ',');
+
+      // Ajouter la condition WHERE pour mettre à jour uniquement le cours spécifié
+      $updateQuery .= " WHERE course_id = '$selectedCoursId'";
+
+      // Exécuter la requête de mise à jour
+      if ($conn->query($updateQuery) === TRUE) {
+          echo "<script>alert('تم تعديل عنوان الدرس بنجاح.');</script>";
+          header("Location: index.php"); // Redirect to index.php after successful update
+          exit(); 
+      } else {
+          echo "Erreur : " . $conn->error;
+      }
   }
 }
 ?>

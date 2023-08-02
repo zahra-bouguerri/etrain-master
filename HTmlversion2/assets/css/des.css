@@ -1,13 +1,4 @@
-/* fentr flotant */
-.modal-content {
-background-color: #fefefe;
-margin: 10% auto;
-padding: 40px;
-border: 1px solid #888;
-width: 70%;
-max-width: 800px;
-border-radius: 10px; /* Ajouter une bordure arrondie */
-}
+
 
 label {
 font-weight: bold;
@@ -63,7 +54,7 @@ background-color: rgba(0, 0, 0, 0.5);
 
 .modal-content {
 background-color: #fefefe;
-margin: 10% auto; /* Réduire la marge supérieure pour centrer la fenêtre */
+margin: 2% auto; /* Réduire la marge supérieure pour centrer la fenêtre */
 padding: 40px; /* Augmenter l'espace de remplissage interne */
 border: 1px solid #888;
 width: 70%; /* Augmenter la largeur de la fenêtre */

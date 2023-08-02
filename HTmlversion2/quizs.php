@@ -89,6 +89,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
     <!-- Mettez ici les balises meta, title, CSS, etc. -->
 </head>
 <style>
+    .radio-container {
+    display: flex; /* Utiliser flexbox pour aligner les cercles de radio et les zones de saisie horizontalement */
+    align-items: center; /* Aligner les éléments verticalement au centre */
+    margin-bottom: 10px;
+}
+
+.radio-container input[type="radio"] {
+    margin-right: 5px; /* Ajouter un espacement entre le cercle de radio et la zone de saisie */
+}
+
+.response-container {
+    display: flex; /* Utiliser flexbox pour aligner les étiquettes de cercle de radio et les zones de saisie horizontalement */
+    align-items: center; /* Aligner les éléments verticalement au centre */
+    margin-bottom: 10px;
+}
+
+.response-container input[type="text"] {
+    width: 1100px; /* Largeur initiale */
+    margin-right: 5px; /* Ajouter un espacement entre l'étiquette de cercle de radio et la zone de saisie */
+}
+
+.response-container label {
+    display: block;
+}
+
     .response-container {
         margin-bottom: 10px;
     }

@@ -349,7 +349,7 @@ if (isset($_POST['deletesub'])) {
       $checkLinkedQuery = "SELECT * FROM cours  WHERE subchapter_id = '$subchapterId' LIMIT 1";
       $linkedResult = $conn->query($checkLinkedQuery);
       if ($linkedResult->num_rows > 0) {
-        $linkedRecords[] = $suchapterId;
+        $linkedRecords[] = $subchapterId;
       }
       // Vérifiez également les autres tables liées ici et ajoutez les ID de cours liés à $linkedRecords si nécessaire
     }
@@ -358,12 +358,14 @@ if (isset($_POST['deletesub'])) {
       // Certains cours ont des enregistrements liés, affichez le message d'erreur
       $subchaptersList = implode(", ", $linkedRecords);
        echo "<script>alert(' لا يمكن حذف الوحدة لاانها تحتوي على دروس يرجى حذفهم اولا');</script>";
-    } else {
+
+      } else {
       // Aucun enregistrement lié trouvé, procédez à la suppression des cours
       $subchapterIds = implode("','", $subchaptersToDelete);
       $deletesubchaptersQuery = "DELETE FROM sous_chapitre WHERE subchapter_id IN ('$subchapterIds')";
       if ($conn->query($deletesubchaptersQuery)) {
         echo "<script>alert('تم حذف الوحدات بنجاح.');</script>";
+       
       } else {
         echo "Error: " . $conn->error;
       }
@@ -550,7 +552,8 @@ if (isset($_POST['modifiersequence'])) {
         // Exécuter la requête de mise à jour
         if ($conn->query($updateQuery) === TRUE) {
             echo "<script>alert('تم تعديل الوحدة الجزئية بنجاح.');</script>";
-        } else {
+          
+          } else {
             echo "Erreur : " . $conn->error;
         }
     }
@@ -597,12 +600,7 @@ if (isset($_POST['modifiersequence'])) {
                   </select>
                   <label for="unitName">  الوحدة الجزيئية  الجديدة </label>
                   <input type="text" id="unitName" name="unitName" >
-                  <label for="cours"> حالة  </label>
-                <select name="etat" class="niveau" >
-                  <option value=""> --اختر--</option>
-                  <option value=""> <option>
-                 <option value=" جديد"> جديد</option>
-                </select>
+                 
                   <button type="submit" name ="modifierSequence">تعديل</button>
                 </form>
               </div>
@@ -616,7 +614,7 @@ if (isset($_POST['modifierSequence'])) {
     $chapterId = $_POST['chapter'];
     $subchapterId = $_POST['subchapter'];
     $newSubchapterName = $_POST['unitName'];
-    $newEtat = $_POST['etat'];
+  
 
     // Vérifier si la sous-unité existe déjà dans la base de données pour cette branche et ce chapitre
     $checkQuery = "SELECT * FROM sous_chapitre WHERE subchapter_name = '$newSubchapterName' AND chapter_id = '$chapterId'";
@@ -633,10 +631,7 @@ if (isset($_POST['modifierSequence'])) {
             $updateQuery .= " subchapter_name = '$newSubchapterName',";
         }
 
-        // Si un nouvel état a été fourni (non vide et différent du champ "vide"), inclure le champ etat dans la requête de mise à jour
-        if ($newEtat !== '' && $newEtat !== 'vide') {
-            $updateQuery .= " etat = '$newEtat',";
-        }
+      
 
         // Supprimer la dernière virgule dans la requête de mise à jour
         $updateQuery = rtrim($updateQuery, ',');
@@ -647,7 +642,8 @@ if (isset($_POST['modifierSequence'])) {
         // Exécuter la requête de mise à jour
         if ($conn->query($updateQuery) === TRUE) {
             echo "<script>alert('تم تعديل الوحدة الجزئية بنجاح.');</script>";
-        } else {
+          
+          } else {
             echo "Erreur : " . $conn->error;
         }
     }
@@ -746,10 +742,14 @@ if (isset($_POST['modifiercour'])) {
           $updateQuery .= " course_name = '$newCoursTitle',";
       }
 
-      // Si un nouvel état a été fourni (non vide et différent du champ "vide"), inclure le champ etat dans la requête de mise à jour
-      if ($newEtat !== '' && $newEtat !== 'vide') {
-          $updateQuery .= " etat = '$newEtat',";
-      }
+      // Vérifier si un nouvel état a été fourni ou si l'option "vide" a été sélectionnée
+      if ($newEtat !== 'vide') {
+        // Inclure le champ etat dans la requête de mise à jour
+        $updateQuery .= " etat = '$newEtat',";
+    } else {
+        // Sinon, mettre le champ etat à une valeur vide ou null dans la base de données (selon le schéma de la base de données)
+        $updateQuery .= " etat = '',"; // or $updateQuery .= " etat = NULL,"; if your schema allows NULL values
+    }
 
       // Supprimer la dernière virgule dans la requête de mise à jour
       $updateQuery = rtrim($updateQuery, ',');
@@ -760,6 +760,7 @@ if (isset($_POST['modifiercour'])) {
       // Exécuter la requête de mise à jour
       if ($conn->query($updateQuery) === TRUE) {
           echo "<script>alert('تم تعديل عنوان الدرس بنجاح.');</script>";
+      
       } else {
           echo "Erreur : " . $conn->error;
       }
