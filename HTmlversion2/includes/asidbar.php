@@ -10,14 +10,7 @@ include "./config/connexion.php";
           <img src="./assets/imgs/logo.png" alt="Elzero" style="max-width: 100%; height: auto;">
         </h3>
         <ul>
-          <li>
-            <a class="active d-flex align-center fs-14 c-black rad-6 p-10" href="index.php">
-              <i class="fas fa-home fa-fw"></i>
-              &nbsp;
-              &nbsp;
-              <span> الرئيسية </span>
-            </a>
-          </li>
+    
           <li>
             <a class="d-flex align-center fs-14 c-black rad-6 p-10" href="filiere.php">
               <i class="fas fa-user-graduate fa-fw"></i>
