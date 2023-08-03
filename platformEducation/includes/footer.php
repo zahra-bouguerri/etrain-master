@@ -56,7 +56,7 @@
                         <div class="row">
                             <div class="col-lg-12">
                                 <p class="footer-text m-0"><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                               جميع الحقوق محفوظة <script>document.write(new Date().getFullYear());</script> &copy;  | تمت برمجة هذا الموقع من طرف <a href="https://colorlib.com" target="_blank"></a> <i class="ti-heart" aria-hidden="true"></i>
+                               جميع الحقوق محفوظة <script>document.write(new Date().getFullYear());</script> &copy;  |   تمت برمجة هذا الموقع من طرف <a href="https://instagram.com/siteweb_ryz?utm_source=qr&igshid=MzNlNGNkZWQ4Mg%3D%3D" target="_blank">SiteWeb_RYZ</a> <i class="ti-heart" aria-hidden="true"></i>
 <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
                             </div>
                         </div>
