@@ -5,8 +5,8 @@
                     <div class="single-footer-widget footer_2">
                         <h4 class="text-center">تواصل معنا</h4>
                         <div class="contact_info">
-                            <p><span> العنوان :</span> Hath of it fly signs bear be one blessed after </p>
-                            <p><span> الهاتف :</span> +2 36 265 (8060)</p>
+                           
+                           
                             <p><span> البريد الالكتروني : </span>mathprof214@gmail.com </p>
                         </div>
                     </div>

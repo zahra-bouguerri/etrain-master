@@ -74,6 +74,7 @@ if (isset($_GET['quiz'])) {
                                         echo '<div style="text-align: center;">';
                                         echo '<img src="' . $imagePath . '" alt=" لا توجد صورة ">';
                                         echo '</div>';
+                                        echo '<br>';
                                     endif; ?>
                                     <?php foreach ($responses[$question_id] as $response) : ?>
                                         <div>
