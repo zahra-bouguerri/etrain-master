@@ -1,5 +1,4 @@
 <?php
-
 include "./config/connexion.php";
 include "./includes/header.php";
 
@@ -13,7 +12,7 @@ if (isset($_GET['quiz'])) {
         $userId = $_GET['user'];
     } else {
         // Si l'utilisateur n'est pas connecté et le paramètre "user" n'est pas présent dans l'URL, affichez un message ou redirigez-le vers une page de connexion.
-        echo "Veuillez vous connecter pour accéder au quiz.";
+        echo "<script>alert('Veuillez vous connecter pour accéder au quiz.')</script>;";
         exit;
     }
 
@@ -73,7 +72,7 @@ if (isset($_GET['quiz'])) {
                                     <?php if ($question['question_img'] !== '') :
                                         $imagePath = "../HTMLversion2/" . $question['question_img'];
                                         echo '<div style="text-align: center;">';
-                                        echo '<img src="' . $imagePath . '" alt="Question Image">';
+                                        echo '<img src="' . $imagePath . '" alt=" لا توجد صورة ">';
                                         echo '</div>';
                                     endif; ?>
                                     <?php foreach ($responses[$question_id] as $response) : ?>
@@ -85,7 +84,7 @@ if (isset($_GET['quiz'])) {
                                     <?php endforeach; ?>
                                 </div>
                             </div>
-                            <button class="button rounded-0 primary-bg text-white w-100 btn_1 show-correction-btn" data-question-id="<?php echo $question_id; ?>" type="button">Afficher les réponses</button>
+                            <button class="button rounded-0 primary-bg text-white w-100 btn_1 show-correction-btn" data-question-id="<?php echo $question_id; ?>" type="button">تاكيد</button>
                             <?php if (!$userSelectedResponse && $index < count($questions) - 1) : ?>
                                 <div class="detials">
                                     <button class="button rounded-0 primary-bg text-white w-100 btn_1 next-question-btn" data-question-number="<?php echo $index; ?>" type="button">السؤال القادم</button>
@@ -98,7 +97,7 @@ if (isset($_GET['quiz'])) {
             <?php endforeach; ?>
             <div class="detials">
                 <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit" name="submit_quiz">
-                    Soumettre le quiz
+                   استظهار النتيجة النهائية
                 </button>
             </div>
         </form>
@@ -122,7 +121,7 @@ if (isset($_GET['quiz'])) {
         const percentageCorrect = (totalCorrectResponses / questions.length) * 100;
 
         // Afficher le pourcentage dans l'alerte
-        alert(`Bravo ! Vous avez répondu correctement à ${percentageCorrect.toFixed(2)}% des questions.`);
+        alert(`لقد كانت اجابتك صحيحة  ${percentageCorrect.toFixed(2)}% des questions.`);
 
         const quizId = document.getElementById('selected_quiz_id').value;
         const userId = <?php echo isset($userId) ? $userId : 'null'; ?>; // Récupérer l'ID de l'utilisateur depuis la variable PHP $userId
@@ -143,11 +142,11 @@ if (isset($_GET['quiz'])) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log('Résultats du quiz enregistrés avec succès dans la base de données.');
+            console.log('لقد تم الحفظ.');
             // Rediriger l'utilisateur vers la page de confirmation
             window.location.href = data.redirect;
         } else {
-            console.error('Échec de l\'enregistrement des résultats du quiz dans la base de données.');
+            console.error('حدث خطا.');
         }
     })
     .catch(error => {
@@ -212,9 +211,9 @@ if (isset($_GET['quiz'])) {
             alert("Bravo ! Vous avez répondu correctement.");
             totalCorrectResponses++;
         } else if (isAnyResponseIncorrect) {
-            alert("À refaire. Veuillez réviser vos réponses et essayer à nouveau.");
+            alert("يرجى اعادة المحاولة.");
         } else {
-            alert("vous devez selectionner une reponse ");
+            alert("اختر اجابة واحدة ");
         }
 
             if (currentQuestionNumber === questions.length - 1) {

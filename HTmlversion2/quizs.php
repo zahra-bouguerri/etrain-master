@@ -16,7 +16,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $allChoices, $corre
     $result = mysqli_query($conn, $checkQuizQuery);
 
     if (mysqli_num_rows($result) > 0) {
-        echo "<script>alert('هناك اختبار بنفس الاسم ونفس الدورة موجود بالفعل. يُرجى اختيار اسم اختبار مختلف.');</script>";
+        echo "<script>alert('Un quiz avec le même nom et le même cours existe déjà. Veuillez choisir un nom de quiz différent.');</script>";
         return; // Exit the function if the quiz already exists
     }
 
@@ -38,7 +38,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $allChoices, $corre
         $result = mysqli_query($conn, $checkQuestionQuery);
 
         if (mysqli_num_rows($result) > 0) {
-           
+            echo "<script>alert('azer.');</script>";
             return; // Exit the function if the quiz already exists
         }
         // Insert question data into the database
@@ -57,7 +57,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $allChoices, $corre
         }   
     }
 
-    echo "<script>alert('تمت إضافة الاختبار بنجاح..')</script>";
+    echo "<script>alert('Le quiz a été ajouté avec succès.')</script>";
 }
 
 // Vérifier si le formulaire a été soumis
@@ -89,31 +89,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
     <!-- Mettez ici les balises meta, title, CSS, etc. -->
 </head>
 <style>
-    .radio-container {
-    display: flex; /* Utiliser flexbox pour aligner les cercles de radio et les zones de saisie horizontalement */
-    align-items: center; /* Aligner les éléments verticalement au centre */
-    margin-bottom: 10px;
-}
-
-.radio-container input[type="radio"] {
-    margin-right: 5px; /* Ajouter un espacement entre le cercle de radio et la zone de saisie */
-}
-
-.response-container {
-    display: flex; /* Utiliser flexbox pour aligner les étiquettes de cercle de radio et les zones de saisie horizontalement */
-    align-items: center; /* Aligner les éléments verticalement au centre */
-    margin-bottom: 10px;
-}
-
-.response-container input[type="text"] {
-    width: 1100px; /* Largeur initiale */
-    margin-right: 5px; /* Ajouter un espacement entre l'étiquette de cercle de radio et la zone de saisie */
-}
-
-.response-container label {
-    display: block;
-}
-
     .response-container {
         margin-bottom: 10px;
     }
@@ -445,10 +420,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
             }
 
             // Bouton "Supprimer question" pour supprimer la question entière
-            newQuestionContainer.append('<button type="button" class="supprimer-question cc">حذف سؤال </button>');
+            newQuestionContainer.append('<button type="button" class="supprimer-question">Supprimer question</button>');
 
             // Ajouter le nouveau bouton "Ajouter question" à la fin de la nouvelle question
-            newQuestionContainer.append('<button type="button" class="ajouter-question cc">اضافة سؤال</button>');
+            newQuestionContainer.append('<button type="button" class="ajouter-question">اضافة </button>');
 
             // Insérer la nouvelle question après la question actuelle
             $("#" + currentQuestionContainerId).after(newQuestionContainer);
@@ -467,7 +442,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
                 reponseContainer.find("input[type='radio']").remove();
                 reponseContainer.find(".supprimer-reponse").remove();
             } else {
-                alert("لا يمكنك حذف جميع الردود. يجب أن يكون هناك إجابة واحدة على الأقل لكل سؤال..");
+                alert("Vous ne pouvez pas supprimer toutes les réponses. Chaque question doit avoir au moins une réponse.");
             }
         });
 

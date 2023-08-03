@@ -11,8 +11,8 @@
                             <h2>استكشاف عالم الرياضيات المثير</h2>
                                 <p>تتجدد الفصول ويكبر الإنسان. يبحث كل إنسان عن إثراء حياته بالمعرفة والتعلم.<br> هنا، ستجد المساعدة التي تحتاجها لتعزيز مهاراتك ومعرفتك في الرياضيات. تعلم الدروس وأجب عن الأسئلة للوصول إلى تقدمك. إذا أجبت بشكل صحيح، فسوف تحصل على تقييم نهائي يعكس جهودك. وفي حال عدم الإجابة بشكل صحيح، ستتاح لك الفرصة لإعادة الأسئلة وتحسين أدائك. بالإضافة إلى ذلك، ستجد مقاطع فيديو توضيحية لكل درس تساعدك على فهم الأفكار بشكل أفضل.
                                     نحن نهدف لتحسين تجربتك التعليمية وتطوير مهاراتك في الرياضيات. انضم إلينا الآن واكتشف إمكاناتك وحقق تطورك في عالم الرياضيات للشباب في المدرسة الثانوية.</p>
-                            <a href="#" class="btn_2"> انضم الينا </a>
-                            <a href="#" class="btn_1">ابدا ! </a>
+                            <a href="login.php" class="btn_2"> انضم الينا </a>
+                            <a href="" class="btn_1">ابدا ! </a>
                         </div>
                     </div>
                 </div>
@@ -118,19 +118,19 @@ function getTotalCount() {
             <div class="row">
                 <div class="col-lg-3 col-sm-6">
                     <div class="single_member_counter">
-                        <span class="counter"><?php echo getCountByNiveau("premier"); ?></span>
+                        <span class="counter"><?php echo getCountByNiveau("الأولى ثانوي"); ?></span>
                         <h4>الأولى ثانوي</h4>
                     </div>
                 </div>
                 <div class="col-lg-3 col-sm-6">
                     <div class="single_member_counter">
-                    <span class="counter"><?php echo getCountByNiveau("dexieme"); ?></span>
+                    <span class="counter"><?php echo getCountByNiveau(" الثانية ثانوي"); ?></span>
                         <h4> الثانية ثانوي</h4>
                     </div>
                 </div>
                 <div class="col-lg-3 col-sm-6">
                     <div class="single_member_counter">
-                    <span class="counter"><?php echo getCountByNiveau("troisieme"); ?></span>
+                    <span class="counter"><?php echo getCountByNiveau("الثالثة ثانوي"); ?></span>
                         <h4>الثالثة ثانوي</h4>
                     </div>
                 </div>

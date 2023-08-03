@@ -61,7 +61,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Résultats du Quiz</title>
+    <title>نتيجة الاختبار</title>
     <style>
         /* Réinitialisation de la marge et du rembourrage par défaut */
         body, h1, h2, p {
@@ -138,9 +138,9 @@ $conn->close();
                     <p>نسبة الإجابات الصحيحة : <?php echo $percentageCorrect; ?>%</p>
                     
                     <?php if ($percentageCorrect > 80 || $nextQuizId == null) : ?>
-                        <a href="aa.php?quiz=<?php echo $quizId; ?>&user=<?php echo $userId; ?>" class="button">اختبار التالي</a>
+                        <a href="quiz.php?quiz=<?php echo $quizId; ?>&user=<?php echo $userId; ?>" class="button">اختبار التالي</a>
                     <?php else: ?>
-                        <a href="aa.php?quiz=<?php echo $nextQuizId; ?>&user=<?php echo $userId; ?>" class="button">إعادة الاختبار</a>
+                        <a href="quiz.php?quiz=<?php echo $nextQuizId; ?>&user=<?php echo $userId; ?>" class="button">إعادة الاختبار</a>
                     <?php endif; ?>
                 </div>
             </div>

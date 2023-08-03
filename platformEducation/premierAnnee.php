@@ -107,7 +107,7 @@ include "./includes/header.php";?>
             $quizId = $quizRow['quiz_id'];
             $quizName = $quizRow['quiz_name'];
 
-            $link = "aa.php?quiz=" . $quizId . "&user=" . $userId;
+            $link = "quiz.php?quiz=" . $quizId . "&user=" . $userId;
         echo "<li>
         <a class='d-flex quizItem' id='quiz_$quizId' href='$link'>
             <p class='titre4'> " . $quizName . "</p>
