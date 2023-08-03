@@ -121,7 +121,7 @@ if (isset($_GET['quiz'])) {
         const percentageCorrect = (totalCorrectResponses / questions.length) * 100;
 
         // Afficher le pourcentage dans l'alerte
-        alert(`لقد كانت اجابتك صحيحة  ${percentageCorrect.toFixed(2)}% des questions.`);
+        alert(`لقد كانت اجابتك صحيحة  ${percentageCorrect.toFixed(2)}% .`);
 
         const quizId = document.getElementById('selected_quiz_id').value;
         const userId = <?php echo isset($userId) ? $userId : 'null'; ?>; // Récupérer l'ID de l'utilisateur depuis la variable PHP $userId
@@ -208,7 +208,7 @@ if (isset($_GET['quiz'])) {
             button.disabled = true;
 
             if (!isAnyResponseIncorrect && isAnyResponseCorrect) {
-            alert("Bravo ! Vous avez répondu correctement.");
+            alert("احسنت اجابة صحيحة.");
             totalCorrectResponses++;
         } else if (isAnyResponseIncorrect) {
             alert("يرجى اعادة المحاولة.");

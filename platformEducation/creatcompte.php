@@ -18,7 +18,7 @@ if (isset($_POST['signin'])) {
     $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
-        echo "<script>alert('Email already exists');</script>";
+        echo "<script>alert('البريد الالكتروني موجود بالفعل');</script>";
         echo "<script>window.location.href='login.php';</script>";
         exit();
     }
@@ -29,7 +29,7 @@ if (isset($_POST['signin'])) {
     $success = $stmt->execute();
 
     if ($success) {
-        echo "<script>alert('Your email has been registered successfully.');</script>";
+        echo "<script>alert('تم انشاء حسابك.');</script>";
         echo "<script>window.location.href='index.php';</script>";
         exit();
     } else {

@@ -16,7 +16,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $allChoices, $corre
     $result = mysqli_query($conn, $checkQuizQuery);
 
     if (mysqli_num_rows($result) > 0) {
-        echo "<script>alert('Un quiz avec le même nom et le même cours existe déjà. Veuillez choisir un nom de quiz différent.');</script>";
+        echo "<script>alert(اسم التقويم موجود سابقا');</script>";
         return; // Exit the function if the quiz already exists
     }
 
@@ -57,7 +57,7 @@ function ajouterQuiz($quizName, $courseId, $questions, $img, $allChoices, $corre
         }   
     }
 
-    echo "<script>alert('Le quiz a été ajouté avec succès.')</script>";
+    echo "<script>alert('تمت الاضافة.')</script>";
 }
 
 // Vérifier si le formulaire a été soumis
@@ -153,7 +153,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
                                 echo '<option value="' . $coursId . '">' . $coursName . '</option>';
                             }
                         } else {
-                            echo '<option value="">Aucun cours trouvé</option>';
+                            echo '<option value="">لا يوجد درس</option>';
                         }
                         ?>
                     </select>
@@ -395,8 +395,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["ajouter_quiz"])) {
 
 
                 
-                <button onclick="insertSymbol('lim_{}')">Limite</button>
-    <button onclick="insertSymbol('x→∞')">→∞</button>
+                <button onclick="insertSymbol('lim_{}')">Lim</button>
+    <button onclick="insertSymbol('x→∞')">x→∞</button>
               <!-- Ajoutez d'autres boutons de clavier avec les symboles correspondants -->
             </div>
 
